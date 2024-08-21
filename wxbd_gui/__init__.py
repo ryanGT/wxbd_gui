@@ -132,8 +132,6 @@ class Window(wx.Frame):
         """"""
         dlg = AddBlockDialog(self, "Add Block Dialog")
         dlg.ShowModal()
-        name = dlg.namebox.GetValue()
-        print("name: %s" % name)
 
 
          
