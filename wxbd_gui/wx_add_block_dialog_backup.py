@@ -15,7 +15,6 @@ import copy
 ##     - make list of params widgets
 ##     - determine whether or not to display actuators and/or sensors
 
-max_params = 6# the maximum number of parameres a block is assumed to have
 
 class params_mini_panel(wx.Panel):
     def __init__(self, parent, param_label):
@@ -30,10 +29,6 @@ class params_mini_panel(wx.Panel):
         self.vbox.Add(self.label, wx.TOP|wx.LEFT|wx.RIGHT)
         self.vbox.Add(self.text, wx.BOTTOM|wx.LEFT|wx.RIGHT)#|wx.EXPAND)
         self.SetSizer(self.vbox)
-
-
-    def SetLabel(self, label):
-        self.label.SetLabel(label)
 
 
     def GetValue(self):
@@ -103,11 +98,6 @@ class AddBlockDialog(wx.Dialog):
                          border=15)
         wrapper.Add(button_sizer, 1, flag = wx.ALL, border = 15)
 
-        ## Params panels
-        self.create_params_sizer_and_panel()
-        self.create_params_panels()
-        self.main_sizer.Add(self.params_sizer, wx.EXPAND)
-
         self.categories_choice.Bind(wx.EVT_CHOICE, self.OnCategoryChoice)
            
         cat_ind = self.categories_choice.GetSelection()
@@ -152,20 +142,7 @@ class AddBlockDialog(wx.Dialog):
 
     def create_params_sizer_and_panel(self):
         self.params_panel = wx.Panel(self.panel) 
-        self.params_sizer = wx.GridSizer(cols=2,vgap=5, hgap=5)
-
-
-    def create_params_panels(self):
-        self.params_panels = []
-
-        for i in range(max_params):
-            j = i + 1
-            param_str = "Param %i" % j
-            curpanel = params_mini_panel(self.panel, param_str) 
-            self.params_panels.append(curpanel)
-            self.params_sizer.Add(curpanel)#, style=wx.ALL, border=15)
-
-
+        self.params_sizer = wx.GridSizer(cols=2)
         
 
     def category_selected(self):
@@ -191,45 +168,14 @@ class AddBlockDialog(wx.Dialog):
         self.category_selected()
 
 
-
-    def hide_panels(self, m):
-        q = max_params - m
-        for i in range(q):
-            h = m+i
-            print("h = %i" % h)
-            curpanel = self.params_panels[h]
-            curpanel.Hide()
-            curpanel.Layout()
-            curpanel.Update()
-
-
-
-    def show_panels(self, m):
-        for i in range(m):
-            print("i = %i" %i)
-            curpanel = self.params_panels[i]
-            curpanel.Show()
-            curpanel.Layout()
-            curpanel.Update()
-
-
-
-    def set_params_labels(self, params_list):
-        for i, p in enumerate(params_list):
-            curpanel = self.params_panels[i]
-            curpanel.SetLabel(p)
-
-
-
-
     def on_block_type_choice(self, event):
         print("block type selected")
         # this is where the params panel needs to be deleted and recreated
         #
         # - how to handle plants that have no actuators or something like that?
-        #self.delete_params_panels()
-        #self.delete_params_sizer_and_panel()
-        #self.create_params_sizer_and_panel()
+        self.delete_params_panels()
+        self.delete_params_sizer_and_panel()
+        self.create_params_sizer_and_panel()
         ind = self.block_type_list.GetSelection()
         block_type = self.block_type_list.GetString(ind)
         params, default_params = self.get_params_for_block_type(block_type)
@@ -238,33 +184,29 @@ class AddBlockDialog(wx.Dialog):
         print('\n')
         print('default_params:')
         print(default_params)
-        m = len(params)
-        self.hide_panels(m)
-        self.show_panels(m)
-        self.set_params_labels(params)
-        #self.create_params_panels(params)
-        #self.main_sizer.Add(self.params_sizer, wx.EXPAND)
+        self.create_params_panels(params)
+        self.main_sizer.Add(self.params_sizer, wx.EXPAND)
         self.panel.Layout()
         self.panel.Update()
 
 
-    # from old version:
-    #def create_params_panels(self, params):
-    #    # - doing this as two columns seems tricky
-    #    # - I need to add two labels and then two widgets in 
-    #    #   alternating rows
-    #    # - is this worth the pain?
-    #    # - do I divide them ahead of time into column groups?
-    #    # - do I create multiple panels somehow?
-    #    # - does each label/widget pair go on a panel?
-    #    self.params_widget_dict = {}
-    #    self.params_panels = []
-    #
-    #    for param in params:
-    #        curpanel = params_mini_panel(self.panel, param) 
-    #        self.params_panels.append(curpanel)
-    #        self.params_widget_dict[param] = curpanel
-    #        self.params_sizer.Add(curpanel)
+
+    def create_params_panels(self, params):
+        # - doing this as two columns seems tricky
+        # - I need to add two labels and then two widgets in 
+        #   alternating rows
+        # - is this worth the pain?
+        # - do I divide them ahead of time into column groups?
+        # - do I create multiple panels somehow?
+        # - does each label/widget pair go on a panel?
+        self.params_widget_dict = {}
+        self.params_panels = []
+
+        for param in params:
+            curpanel = params_mini_panel(self.panel, param) 
+            self.params_panels.append(curpanel)
+            self.params_widget_dict[param] = curpanel
+            self.params_sizer.Add(curpanel)
 
 
     def populate_default_params(self, default_params):
