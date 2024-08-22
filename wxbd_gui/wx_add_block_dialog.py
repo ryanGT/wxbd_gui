@@ -119,8 +119,14 @@ class AddBlockDialog(wx.Dialog):
         print("cat_ind: %s" % cat_ind)
         self.category_selected()
         self.Bind(wx.EVT_LISTBOX, self.on_block_type_choice, self.block_type_list) 
+        self.go_button.Bind(wx.EVT_BUTTON, self.on_go_button)
         panel.SetSizer(wrapper)
         
+
+    def on_go_button(self, event):
+        mydict = self.read_params_from_boxes()
+        print("mydict = %s" % mydict)
+
 
     def handle_plant_choice(self):
         # - are sensors and actuators defined?
@@ -254,11 +260,26 @@ class AddBlockDialog(wx.Dialog):
         self.show_panels(m)
         self.set_params_labels(params)
         self.assign_default_values(params, default_params)
+        self.params = params
+        self.default_params = default_params
         #self.create_params_panels(params)
         #self.main_sizer.Add(self.params_sizer, wx.EXPAND)
         self.panel.Layout()
         self.panel.Update()
 
+
+    def read_params_from_boxes(self):
+        mydict = {}
+
+        for i, p in enumerate(self.params):
+            curpanel = self.params_panels[i]
+            curstr = curpanel.GetValue()
+            try:
+                myvalue = float(curstr)
+            except:
+                myvalue = curstr
+            mydict[p] = myvalue
+        return mydict
 
     # from old version:
     #def create_params_panels(self, params):
