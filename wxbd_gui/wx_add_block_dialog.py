@@ -36,11 +36,16 @@ class params_mini_panel(wx.Panel):
         self.label.SetLabel(label)
 
 
+    def SetValue(self, value):
+        self.text.SetValue(str(value))
+
+
     def GetValue(self):
         return self.text.GetValue()
 
 
-    def SetValue(self, mystr):
+    def SetValue(self, value):
+        mystr = str(value)
         self.text.SetValue(mystr)
 
 
@@ -220,6 +225,12 @@ class AddBlockDialog(wx.Dialog):
             curpanel.SetLabel(p)
 
 
+    def assign_default_values(self, params_list, default_params):
+        for i, p in enumerate(params_list):
+            curpanel = self.params_panels[i]
+            if p in default_params:
+                dval = default_params[p]
+                curpanel.SetValue(dval)
 
 
     def on_block_type_choice(self, event):
@@ -242,6 +253,7 @@ class AddBlockDialog(wx.Dialog):
         self.hide_panels(m)
         self.show_panels(m)
         self.set_params_labels(params)
+        self.assign_default_values(params, default_params)
         #self.create_params_panels(params)
         #self.main_sizer.Add(self.params_sizer, wx.EXPAND)
         self.panel.Layout()
