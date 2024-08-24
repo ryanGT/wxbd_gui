@@ -79,16 +79,20 @@ class AddBlockDialog(wx.Dialog):
         panel = wx.Panel(self) 
         self.panel = panel
 
+        self.parent = parent
+
         sizer = wx.FlexGridSizer(10, 2, 5, 5)
         wrapper = wx.BoxSizer(wx.VERTICAL)
         self.categories_choice = wx.Choice(panel,choices=pybd.block_categories)
         self.block_type_list = wx.ListBox(panel, size = (100,-1), \
                                choices=[], style = wx.LB_SINGLE)
-        
+       
+        self.block_name_box = wx.TextCtrl(panel)
+
         sizer.AddMany([ (wx.StaticText(panel, label = "Block Category")),
                         (wx.StaticText(panel, label = "Block Name")),
                         (self.categories_choice, 0, wx.EXPAND),
-                        (wx.TextCtrl(panel), 0, wx.EXPAND),
+                        (self.block_name_box, 0, wx.EXPAND),
                         (wx.StaticText(panel, label = "Block Types")),
                         (wx.StaticText(panel, label = "(empty)")),
                         (self.block_type_list, 0, wx.EXPAND),
@@ -114,18 +118,119 @@ class AddBlockDialog(wx.Dialog):
         self.main_sizer.Add(self.params_sizer, wx.EXPAND)
 
         self.categories_choice.Bind(wx.EVT_CHOICE, self.OnCategoryChoice)
-           
+          
+        input_names = ['input_block_name', \
+                       'input2_block_name', \
+                       'input3_block_name']
+        for name in input_names:
+            setattr(self, name, None)
+
         cat_ind = self.categories_choice.GetSelection()
         print("cat_ind: %s" % cat_ind)
         self.category_selected()
         self.Bind(wx.EVT_LISTBOX, self.on_block_type_choice, self.block_type_list) 
         self.go_button.Bind(wx.EVT_BUTTON, self.on_go_button)
+        self.cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel_button)
+        self.Bind(wx.EVT_CLOSE, self.on_cancel_button)
         panel.SetSizer(wrapper)
         
 
+    def _create_new_block(self, block_type, block_name, params):
+        # - How did this work with mytk version?
+        # - How do I want it to work now?
+        kwargs = {}
+
+        # ultimately, input_block_names need to be converted to actual block instances
+        # - look up the block in parent.bd
+        #
+        # Approach:
+        # - input_block_name, input2_block_name, and input3_block_name are attributes of this
+        #   dialog box that the user may have optionally set
+        # - input_block1 through input_block3 are attributes recognized by pybd
+        # - I need to map from one to the other
+        input_pairs = [('input_block_name','input_block1'), \
+                       ('input2_block_name','input_block2'), \
+                       ('input3_block_name','input_block3'), \
+                       ]
+
+
+        # This code seems to assume that input_block1_name, input2_block_name,
+        # and input3_block_name are attributes of the AddBlockDialog that are
+        # either set or set to None
+        for attr, key in input_pairs:
+            input_block_name = getattr(self, attr)
+            if input_block_name is not None:
+                input_block = self.parent.get_block_by_name(input_block_name)
+                kwargs[key] = input_block
+                key2 = key + '_name'
+                kwargs[key2] = input_block_name 
+        
+        block_class = getattr(pybd, block_type)
+        # how do I handle cases with input(s) set?
+
+        # get actuator and sensor if it is a plant
+        print("plant classes: %s" % pybd.plant_class_names)
+        if block_type in pybd.plant_class_names:
+            # we need to handle plant classes with no actuator and those with two sensors
+            print("this is a plant")
+
+            # possible cases:
+            # - actuator or no actuator
+            # - one sensor or two
+            #     - must have at least one sensor to be a plant
+            if block_type not in pybd.plants_with_no_actuators_names:
+                # it has an actuator
+                actuator_name = self.actuators_var.get()
+                print("actuator_name: %s" % actuator_name)
+                myactuator = self.bd.get_actuator_by_name(actuator_name)
+                kwargs['actuator'] = myactuator
+
+            if block_type in pybd.plants_with_two_sensors_names:
+                # it has two sensors
+                sensor1_name = self.sensors_var.get()
+                print("sensor1_name: %s" % sensor1_name)
+                sensor2_name = self.sensor2_var.get()
+                print("sensor2_name: %s" % sensor2_name)
+                sensor1 = self.bd.get_sensor_by_name(sensor1_name)                
+                kwargs['sensor1'] = sensor1
+                sensor2 = self.bd.get_sensor_by_name(sensor2_name)                
+                kwargs['sensor2'] = sensor2                
+            else:
+                # it has only one sensor
+                sensor_name = self.sensors_var.get()
+                print("sensor_name: %s" % sensor_name)
+                mysensor = self.bd.get_sensor_by_name(sensor_name)
+                kwargs['sensor'] = mysensor
+
+
+
+        # get additional kwargs from param boxes here:
+        #other_kwargs = self.get_params_kwargs(self.N_params)
+        ## print("other_kwargs:")
+        ## print(other_kwargs)
+        kwargs.update(params) 
+        print("creating block in go_pressed")
+        print("kwargs:")
+        print(kwargs)
+        new_block = pybd.create_block(block_class, block_type, block_name, **kwargs)
+        return new_block
+
+    
+    def on_cancel_button(self, event):
+        self.EndModal(0)
+
+
+
     def on_go_button(self, event):
+        ind = self.block_type_list.GetSelection()
+        block_type = self.block_type_list.GetString(ind)
         mydict = self.read_params_from_boxes()
         print("mydict = %s" % mydict)
+        block_name = self.block_name_box.GetValue()
+        new_block = self._create_new_block(block_type, block_name, mydict)
+        self.parent.append_block_to_dict(block_name, new_block)
+        self.EndModal(1)
+
 
 
     def handle_plant_choice(self):
@@ -250,6 +355,9 @@ class AddBlockDialog(wx.Dialog):
         ind = self.block_type_list.GetSelection()
         block_type = self.block_type_list.GetString(ind)
         params, default_params = self.get_params_for_block_type(block_type)
+        suggested_name = self.parent.bd.suggest_block_name(block_type)
+        self.block_name_box.SetValue(suggested_name)
+
         print("params: ")
         print(params)
         print('\n')

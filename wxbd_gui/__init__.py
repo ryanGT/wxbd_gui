@@ -14,6 +14,8 @@ ERR_TOL = 1e-5  # floating point slop for peak-detection
 
 from wxbd_gui.wx_add_block_dialog import AddBlockDialog
 
+import py_block_diagram as pybd
+
 
 class PlotPanel(wx.Panel):
     def __init__(self, parent):
@@ -74,7 +76,7 @@ class PlotPanel(wx.Panel):
 
 class Window(wx.Frame):
     def __init__(self, title):
-        super().__init__(parent = None, title = title)
+        super().__init__(parent = None, title = title, size=(900,600))
         panel = wx.Panel(self)
  
         wrapper = wx.BoxSizer(wx.VERTICAL)
@@ -84,15 +86,18 @@ class Window(wx.Frame):
         self.plotpanel = PlotPanel(panel)
         self.plotpanel.init_plot_data()
 
-        sizer.AddMany([ (wx.StaticText(panel, label = "Username")),
-                        (wx.TextCtrl(panel), 0, wx.EXPAND),
-                        (wx.StaticText(panel, label = "Password")),
-                        (wx.TextCtrl(panel), 0, wx.EXPAND),
-                        (wx.StaticText(panel, label = "Address")),
-                        (self.plotpanel, 0, wx.EXPAND) ])
+
+        self.block_listbox = wx.ListBox(panel, size = (100,-1), \
+                             choices=[], style = wx.LB_SINGLE)
+
+
+        sizer.AddMany([ (wx.StaticText(panel, label = "")),\
+                        (wx.StaticText(panel, label = "Blocks")),
+                        (self.plotpanel, 0, wx.EXPAND), \
+                        (self.block_listbox, 0, wx.EXPAND)])
  
-        sizer.AddGrowableRow(2, 1)
-        sizer.AddGrowableCol(1, 1)
+        sizer.AddGrowableRow(1, 1)
+        sizer.AddGrowableCol(0, 1)
  
         wrapper.Add(sizer, 1, flag = wx.ALL | wx.EXPAND, border = 15)
  
@@ -117,12 +122,22 @@ class Window(wx.Frame):
         self.Bind(wx.EVT_MENU, self.onAddBlock, addBlockMenuItem)
         self.SetMenuBar(menuBar)
         
+        self.bd = pybd.block_diagram()
+
         self.Centre() 
         self.Show(True)
   		
 			
- 
- 
+    def append_block_to_dict(self, block_name, new_block):
+        self.bd.append_block_to_dict(block_name, new_block)
+        # update listbox
+        #!# Tk: self.block_list_var.set(self.bd.block_name_list)
+        # - wxpython?
+        #     - I think I need a listbox somewhere
+        #     - should go on main page off to the right of the mpl panel
+        self.block_listbox.Append(block_name)
+
+
     def onExit(self, event):
         """"""
         self.Close()
@@ -131,7 +146,12 @@ class Window(wx.Frame):
     def onAddBlock(self, event):
         """"""
         dlg = AddBlockDialog(self, "Add Block Dialog")
-        dlg.ShowModal()
+        out = dlg.ShowModal()
+        print("out = %s" % out)
+        if out == 1:
+            print("I should draw something.")
+
+        dlg.Destroy()
 
 
          
