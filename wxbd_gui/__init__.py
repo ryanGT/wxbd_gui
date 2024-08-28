@@ -11,6 +11,27 @@ from matplotlib.figure import Figure
 
 ERR_TOL = 1e-5  # floating point slop for peak-detection
 
+## Open-Loop RC plan:
+##
+## - create step input
+##     - auto-place it
+## - create PWM actuator
+## - create ADC sensor
+## - create plant
+##     - auto-place the plant
+## - set the input for the plant
+## - draw the wire
+## - generate the code
+##
+## Closed-Loop RC:
+##
+## - add summing junction
+## - place the summing junction
+## - allow block placements to be adjusted
+## - set both inputs for summing juntion
+## - draw wires
+## - generate code
+
 
 from wxbd_gui.wx_add_block_dialog import AddBlockDialog
 
@@ -49,6 +70,7 @@ class PlotPanel(wx.Panel):
         if self.im.origin == 'upper':
             ymax_i = z.shape[0] - ymax_i
         self.lines = ax.plot(xmax_i, ymax_i, 'ko')
+        self.ax = ax
 
         #self.toolbar.update()  # Not sure why this is needed - ADS
 
@@ -124,12 +146,19 @@ class Window(wx.Frame):
         
         self.bd = pybd.block_diagram()
 
+        self.colorful_wires = 1
+
         self.Centre() 
         self.Show(True)
   		
 			
     def append_block_to_dict(self, block_name, new_block):
         self.bd.append_block_to_dict(block_name, new_block)
+        success_place = self.bd.guess_block_placement(block_name, new_block)
+        if success_place == 1:
+            print("new block successfully placed")
+        else:
+            print("issue placing new block")
         # update listbox
         #!# Tk: self.block_list_var.set(self.bd.block_name_list)
         # - wxpython?
@@ -149,10 +178,42 @@ class Window(wx.Frame):
         out = dlg.ShowModal()
         print("out = %s" % out)
         if out == 1:
+            # If the add block dialog returned 1, it
+            # called append_block_to_dict.
+            # guess the block placement, then draw
             print("I should draw something.")
+            # need to place the new block
+            self.on_draw_btn()
 
         dlg.Destroy()
 
 
          
+    def on_draw_btn(self, *args, **kwargs):
+        print("you pressed draw")
+        ax = self.plotpanel.ax
+        ax.clear()
+        self.bd.update_block_list()
+        block_list = self.bd.block_list
+        print("block_list: %s" % block_list)
+        if len(block_list) > 0:
+            self.bd.ax = ax
+            self.bd.draw(colorful_wires=self.colorful_wires)
+
+            try:
+                xlims = self.bd.get_xlims()
+                ylims = self.bd.get_ylims()
+                ax.set_xlim(xlims)
+                ax.set_ylim(ylims)
+                #self.xmin_var.set(str(xlims[0]))
+                #self.xmax_var.set(str(xlims[1]))
+                #self.ymin_var.set(str(ylims[0]))
+                #self.ymax_var.set(str(ylims[1]))
+            except:
+                print("axes limits not set")
+
+            self.bd.axis_off()
+            self.plotpanel.canvas.draw()
+
+
 
