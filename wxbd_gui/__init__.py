@@ -34,6 +34,7 @@ ERR_TOL = 1e-5  # floating point slop for peak-detection
 
 
 from wxbd_gui.wx_add_block_dialog import AddBlockDialog
+from wxbd_gui.wx_add_actuator_or_sensor_dialog import AddActuatorDialog
 
 import py_block_diagram as pybd
 
@@ -138,10 +139,15 @@ class Window(wx.Frame):
         blockMenu = wx.Menu()
         addBlockMenuItem = blockMenu.Append(wx.Window.NewControlId(), "Add Block",
                                        "Add a new block to the block diagram system")
+        addActuatorMenuItem = blockMenu.Append(wx.Window.NewControlId(), "Add Actuator",
+                                       "Add a new block to the block diagram system")
+
         menuBar.Append(blockMenu, "&Block")
   
         self.Bind(wx.EVT_MENU, self.onExit, exitMenuItem)
         self.Bind(wx.EVT_MENU, self.onAddBlock, addBlockMenuItem)
+        self.Bind(wx.EVT_MENU, self.onAddActuator, addActuatorMenuItem)
+
         self.SetMenuBar(menuBar)
         
         self.bd = pybd.block_diagram()
@@ -217,3 +223,18 @@ class Window(wx.Frame):
 
 
 
+    def onAddActuator(self, event):
+        dlg = AddActuatorDialog(self, "Add Actuator Dialog")
+        out = dlg.ShowModal()
+        print("out = %s" % out)
+        if out == 1:
+            # If the add block dialog returned 1, it
+            # called append_block_to_dict.
+            # guess the block placement, then draw
+            print("I should do something.")
+            # need to place the new block
+            self.on_draw_btn()
+
+        dlg.Destroy()
+
+        
