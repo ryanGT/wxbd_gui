@@ -18,7 +18,8 @@ import copy
 max_params = 6# the maximum number of parameres a block is assumed to have
 
 from wxbd_gui.wxbd_utils import params_mini_panel
-from wxbd_gui.wx_add_actuator_or_sensor_dialog import AddActuatorDialog
+from wxbd_gui.wx_add_actuator_or_sensor_dialog import AddActuatorDialog, \
+                        AddSensorDialog
 
 
 #class params_mini_panel(wx.Panel):
@@ -232,10 +233,33 @@ class AddBlockDialog(wx.Dialog):
             # called append_block_to_dict.
             # guess the block placement, then draw
             print("I should do something with this actuator.")
+            self.actuator = dlg.actuator_instance
             # need to place the new block
             #self.on_draw_btn()
+        else:
+            self.actuator = None
 
         dlg.Destroy()
+        return out
+
+
+    def onAddSensor(self, event):
+        dlg = AddSensorDialog(self, "Add Sensor Dialog")
+        out = dlg.ShowModal()
+        print("out = %s" % out)
+        if out == 1:
+            # If the add block dialog returned 1, it
+            # called append_block_to_dict.
+            # guess the block placement, then draw
+            print("I should do something with this sensor.")
+            self.sensor = dlg.sensor_instance
+            # need to place the new block
+            #self.on_draw_btn()
+        else:
+            self.sensor = None
+
+        dlg.Destroy()
+        return out
 
 
 
@@ -268,12 +292,16 @@ class AddBlockDialog(wx.Dialog):
                 print("plant has an actuator")
                 out = self.onAddActuator(event)
                 print("out = %s" % out)
-                #actuator_name = self.actuators_var.get()
-                #print("actuator_name: %s" % actuator_name)
-                #myactuator = self.bd.get_actuator_by_name(actuator_name)
-                #kwargs['actuator'] = myactuator
+                if out != 1:
+                    # users cancelled actuator creation dialog
+                    # - do nothing
+                    return None
+                # if out == 1, then self.actuator has been set with the 
+                # actuator instance
 
-            #if block_type in pybd.plants_with_two_sensors_names:
+            if block_type in pybd.plants_with_two_sensors_names:
+                ## handle this eventually
+                pass
             #    # it has two sensors
             #    sensor1_name = self.sensors_var.get()
             #    print("sensor1_name: %s" % sensor1_name)
@@ -283,7 +311,17 @@ class AddBlockDialog(wx.Dialog):
             #    kwargs['sensor1'] = sensor1
             #    sensor2 = self.bd.get_sensor_by_name(sensor2_name)                
             #    kwargs['sensor2'] = sensor2                
-            #else:
+            else:
+                print("plant has an actuator")
+                out = self.onAddSensor(event)
+                print("out = %s" % out)
+                if out != 1:
+                    # users cancelled sensor creation dialog
+                    # - do nothing
+                    return None
+                # if out == 1, then self.sensor has been set with the 
+                # sensor instance
+
             #    # it has only one sensor
             #    sensor_name = self.sensors_var.get()
             #    print("sensor_name: %s" % sensor_name)
