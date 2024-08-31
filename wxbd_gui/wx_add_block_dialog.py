@@ -18,6 +18,8 @@ import copy
 max_params = 6# the maximum number of parameres a block is assumed to have
 
 from wxbd_gui.wxbd_utils import params_mini_panel
+from wxbd_gui.wx_add_actuator_or_sensor_dialog import AddActuatorDialog
+
 
 #class params_mini_panel(wx.Panel):
 #    def __init__(self, parent, param_label):
@@ -80,6 +82,7 @@ class AddBlockDialog(wx.Dialog):
         self.panel = panel
 
         self.parent = parent
+        self.bd = self.parent.bd
 
         sizer = wx.FlexGridSizer(10, 2, 5, 5)
         wrapper = wx.BoxSizer(wx.VERTICAL)
@@ -220,6 +223,21 @@ class AddBlockDialog(wx.Dialog):
         self.EndModal(0)
 
 
+    def onAddActuator(self, event):
+        dlg = AddActuatorDialog(self, "Add Actuator Dialog")
+        out = dlg.ShowModal()
+        print("out = %s" % out)
+        if out == 1:
+            # If the add block dialog returned 1, it
+            # called append_block_to_dict.
+            # guess the block placement, then draw
+            print("I should do something with this actuator.")
+            # need to place the new block
+            #self.on_draw_btn()
+
+        dlg.Destroy()
+
+
 
     def on_go_button(self, event):
         ind = self.block_type_list.GetSelection()
@@ -227,8 +245,54 @@ class AddBlockDialog(wx.Dialog):
         mydict = self.read_params_from_boxes()
         print("mydict = %s" % mydict)
         block_name = self.block_name_box.GetValue()
-        new_block = self._create_new_block(block_type, block_name, mydict)
-        self.parent.append_block_to_dict(block_name, new_block)
+        # if we are about to create a plant, we need to do something
+        # - does it need an actuator?
+        #     - more than one?
+        # - does it need a sensor?
+        #     - more than one?
+        block_class = getattr(pybd, block_type)
+        # how do I handle cases with input(s) set?
+
+        # get actuator and sensor if it is a plant
+        print("plant classes: %s" % pybd.plant_class_names)
+        if block_type in pybd.plant_class_names:
+            # we need to handle plant classes with no actuator and those with two sensors
+            print("this is a plant")
+
+            # possible cases:
+            # - actuator or no actuator
+            # - one sensor or two
+            #     - must have at least one sensor to be a plant
+            if block_type not in pybd.plants_with_no_actuators_names:
+                # it has an actuator
+                print("plant has an actuator")
+                out = self.onAddActuator(event)
+                print("out = %s" % out)
+                #actuator_name = self.actuators_var.get()
+                #print("actuator_name: %s" % actuator_name)
+                #myactuator = self.bd.get_actuator_by_name(actuator_name)
+                #kwargs['actuator'] = myactuator
+
+            #if block_type in pybd.plants_with_two_sensors_names:
+            #    # it has two sensors
+            #    sensor1_name = self.sensors_var.get()
+            #    print("sensor1_name: %s" % sensor1_name)
+            #    sensor2_name = self.sensor2_var.get()
+            #    print("sensor2_name: %s" % sensor2_name)
+            #    sensor1 = self.bd.get_sensor_by_name(sensor1_name)                
+            #    kwargs['sensor1'] = sensor1
+            #    sensor2 = self.bd.get_sensor_by_name(sensor2_name)                
+            #    kwargs['sensor2'] = sensor2                
+            #else:
+            #    # it has only one sensor
+            #    sensor_name = self.sensors_var.get()
+            #    print("sensor_name: %s" % sensor_name)
+            #    mysensor = self.bd.get_sensor_by_name(sensor_name)
+            #    kwargs['sensor'] = mysensor
+
+
+        #new_block = self._create_new_block(block_type, block_name, mydict)
+        #self.parent.append_block_to_dict(block_name, new_block)
         self.EndModal(1)
 
 
