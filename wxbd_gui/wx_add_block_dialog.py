@@ -90,6 +90,11 @@ class AddBlockDialog(wx.Dialog):
         self.categories_choice = wx.Choice(panel,choices=pybd.block_categories)
         self.block_type_list = wx.ListBox(panel, size = (100,-1), \
                                choices=[], style = wx.LB_SINGLE)
+        self.input_list = wx.ListBox(panel, size = (100,-1), \
+                                 choices=self.bd.block_name_list, \
+                                 style = wx.LB_SINGLE)
+        self.clear_button = wx.Button(self.panel, label="Clear Input")
+
        
         self.block_name_box = wx.TextCtrl(panel)
 
@@ -98,9 +103,11 @@ class AddBlockDialog(wx.Dialog):
                         (self.categories_choice, 0, wx.EXPAND),
                         (self.block_name_box, 0, wx.EXPAND),
                         (wx.StaticText(panel, label = "Block Types")),
-                        (wx.StaticText(panel, label = "(empty)")),
+                        (wx.StaticText(panel, label = "Input")),
                         (self.block_type_list, 0, wx.EXPAND),
-                        (wx.StaticText(panel, label = "(empty)")),
+                        (self.input_list, 0, wx.EXPAND),
+                        (wx.StaticText(panel, label = "")),
+                        (self.clear_button, 0, wx.ALL),
                        ])
     
         sizer.AddGrowableCol(0, 1)
@@ -133,16 +140,50 @@ class AddBlockDialog(wx.Dialog):
         print("cat_ind: %s" % cat_ind)
         self.category_selected()
         self.Bind(wx.EVT_LISTBOX, self.on_block_type_choice, self.block_type_list) 
+        self.Bind(wx.EVT_LISTBOX, self.on_input_choice, self.input_list) 
+
         self.go_button.Bind(wx.EVT_BUTTON, self.on_go_button)
         self.cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel_button)
+        self.clear_button.Bind(wx.EVT_BUTTON, self.on_clear_button)
+
         self.Bind(wx.EVT_CLOSE, self.on_cancel_button)
         panel.SetSizer(wrapper)
         
+
+    
+    def on_clear_button(self, event):
+        if not hasattr(self, "input_selection_ind"):
+            # do nothing
+            # - nothing was selected
+            return None
+        else:
+            if self.input_selection_ind is not None:
+                self.input_list.Deselect(self.input_selection_ind)
+                self.input_selection_ind = None
+                self.input_block_name = None
+
+
+    def on_input_choice(self, event):
+        ind = self.input_list.GetSelection()
+        self.input_selection_ind = ind
+        print("ind = %s" % ind)
+        if ind is not None:
+            input_string = self.bd.block_name_list[ind]
+            print("input_string = %s" % input_string)
+            self.input_block_name = input_string
+
+
 
     def _create_new_block(self, block_type, block_name, params):
         # - How did this work with mytk version?
         # - How do I want it to work now?
         kwargs = {}
+
+        ##-------------------------------------------------
+        ## Key questions for wx version:
+        # - how am I handling inputs?
+        # - how am I handling actuators and sensors?
+        ##-------------------------------------------------
 
         # ultimately, input_block_names need to be converted to actual block instances
         # - look up the block in parent.bd
@@ -164,11 +205,13 @@ class AddBlockDialog(wx.Dialog):
         for attr, key in input_pairs:
             input_block_name = getattr(self, attr)
             if input_block_name is not None:
-                input_block = self.parent.get_block_by_name(input_block_name)
+                input_block = self.bd.get_block_by_name(input_block_name)
                 kwargs[key] = input_block
                 key2 = key + '_name'
                 kwargs[key2] = input_block_name 
         
+        print("after looking for inputs, kwargs = %s" % kwargs)
+
         block_class = getattr(pybd, block_type)
         # how do I handle cases with input(s) set?
 
@@ -183,28 +226,23 @@ class AddBlockDialog(wx.Dialog):
             # - one sensor or two
             #     - must have at least one sensor to be a plant
             if block_type not in pybd.plants_with_no_actuators_names:
-                # it has an actuator
-                actuator_name = self.actuators_var.get()
-                print("actuator_name: %s" % actuator_name)
-                myactuator = self.bd.get_actuator_by_name(actuator_name)
-                kwargs['actuator'] = myactuator
+                kwargs['actuator'] = self.actuator
 
             if block_type in pybd.plants_with_two_sensors_names:
+                print("fix two sensors plants")
+                pass
                 # it has two sensors
-                sensor1_name = self.sensors_var.get()
-                print("sensor1_name: %s" % sensor1_name)
-                sensor2_name = self.sensor2_var.get()
-                print("sensor2_name: %s" % sensor2_name)
-                sensor1 = self.bd.get_sensor_by_name(sensor1_name)                
-                kwargs['sensor1'] = sensor1
-                sensor2 = self.bd.get_sensor_by_name(sensor2_name)                
-                kwargs['sensor2'] = sensor2                
+                #sensor1_name = self.sensors_var.get()
+                #print("sensor1_name: %s" % sensor1_name)
+                #sensor2_name = self.sensor2_var.get()
+                #print("sensor2_name: %s" % sensor2_name)
+                #sensor1 = self.bd.get_sensor_by_name(sensor1_name)                
+                #kwargs['sensor1'] = sensor1
+                #sensor2 = self.bd.get_sensor_by_name(sensor2_name)                
+                #kwargs['sensor2'] = sensor2                
             else:
                 # it has only one sensor
-                sensor_name = self.sensors_var.get()
-                print("sensor_name: %s" % sensor_name)
-                mysensor = self.bd.get_sensor_by_name(sensor_name)
-                kwargs['sensor'] = mysensor
+                kwargs['sensor'] = self.sensor
 
 
 
@@ -216,7 +254,8 @@ class AddBlockDialog(wx.Dialog):
         print("creating block in go_pressed")
         print("kwargs:")
         print(kwargs)
-        new_block = pybd.create_block(block_class, block_type, block_name, **kwargs)
+        new_block = pybd.create_block(block_class, block_type, \
+                block_name, **kwargs)
         return new_block
 
     
@@ -329,8 +368,8 @@ class AddBlockDialog(wx.Dialog):
             #    kwargs['sensor'] = mysensor
 
 
-        #new_block = self._create_new_block(block_type, block_name, mydict)
-        #self.parent.append_block_to_dict(block_name, new_block)
+        new_block = self._create_new_block(block_type, block_name, mydict)
+        self.parent.append_block_to_dict(block_name, new_block)
         self.EndModal(1)
 
 
