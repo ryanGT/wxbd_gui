@@ -217,6 +217,9 @@ class AddBlockDialog(wx.Dialog):
 
         # get actuator and sensor if it is a plant
         print("plant classes: %s" % pybd.plant_class_names)
+        
+        has_act = 0
+        has_sense_1 = 0
         if block_type in pybd.plant_class_names:
             # we need to handle plant classes with no actuator and those with two sensors
             print("this is a plant")
@@ -227,6 +230,7 @@ class AddBlockDialog(wx.Dialog):
             #     - must have at least one sensor to be a plant
             if block_type not in pybd.plants_with_no_actuators_names:
                 kwargs['actuator'] = self.actuator
+                has_act = 1
 
             if block_type in pybd.plants_with_two_sensors_names:
                 print("fix two sensors plants")
@@ -243,8 +247,17 @@ class AddBlockDialog(wx.Dialog):
             else:
                 # it has only one sensor
                 kwargs['sensor'] = self.sensor
+                has_sense_1 = 1
 
-
+            
+        ## I need to append the actuator and sensor to
+        ## self.bd, but I want to make sure the block creation
+        ## was successful so that I don't add multiple actuators
+        ## or sensors that are kind of floating
+        if has_act:
+            self.bd.append_actuator(self.actuator)
+        if has_sense_1:
+            self.bd.append_sensor(self.sensor)
 
         # get additional kwargs from param boxes here:
         #other_kwargs = self.get_params_kwargs(self.N_params)
