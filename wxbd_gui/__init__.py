@@ -12,9 +12,7 @@ from matplotlib.figure import Figure
 from krauss_misc import txt_mixin 
 ## ToDo:
 ##
-## - save GUI params and folders on quit
 ## - add keyboard short cuts (started)
-## - default to all blocks as print blocks (fixed)
 ## - add column labels to serial output in menu code
 
 ERR_TOL = 1e-5  # floating point slop for peak-detection
