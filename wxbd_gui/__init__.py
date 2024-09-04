@@ -12,6 +12,8 @@ from matplotlib.figure import Figure
 from krauss_misc import txt_mixin 
 ## ToDo:
 ##
+## - make option to specify input(s) later
+##    - need an input dialog
 ## - add keyboard short cuts (started)
 ## - add column labels to serial output in menu code
 
@@ -41,6 +43,7 @@ ERR_TOL = 1e-5  # floating point slop for peak-detection
 
 from wxbd_gui.wx_add_block_dialog import AddBlockDialog
 from wxbd_gui.wx_add_actuator_or_sensor_dialog import AddActuatorDialog
+from wxbd_gui.wx_set_inputs_dialog import SetInputsDialog
 
 import py_block_diagram as pybd
 
@@ -188,6 +191,8 @@ class Window(wx.Frame):
         blockMenu = wx.Menu()
         addBlockMenuItem = blockMenu.Append(wx.Window.NewControlId(), "Add Block",
                                        "Add a new block to the block diagram system")
+        setInputsMenuItem = blockMenu.Append(wx.Window.NewControlId(), \
+                        "Set Input(s)", "Specify the input(s) for a block")
         #addActuatorMenuItem = blockMenu.Append(wx.Window.NewControlId(), "Add Actuator",
         #                               "Add a new block to the block diagram system")
 
@@ -201,6 +206,7 @@ class Window(wx.Frame):
         self.Bind(wx.EVT_MENU, self.onSave, SaveMenuItem)
         self.Bind(wx.EVT_MENU, self.onLoad, LoadMenuItem)
         self.Bind(wx.EVT_MENU, self.onAddBlock, addBlockMenuItem)
+        self.Bind(wx.EVT_MENU, self.onSetInputs, setInputsMenuItem)
         self.Bind(wx.EVT_MENU, self.on_set_arduino_tempalate, \
                   set_arduino_template_MenuItem)
         self.Bind(wx.EVT_MENU, self.on_get_arduino_template_path, \
@@ -231,7 +237,60 @@ class Window(wx.Frame):
 
         self.Centre() 
         self.Show(True)
- 
+
+
+    def get_block_names(self):
+        count = self.block_listbox.GetCount()
+        mylist = []
+        for row in range(count):
+            item = self.block_listbox.GetString(row)
+            mylist.append(item)
+        
+        return mylist
+
+
+    def onSetInputs(self, event):
+        print("in onSetInputs")
+        ind = self.block_listbox.GetSelection()
+        print("ind = %s" % ind)
+        if ind == -1:
+            # nothing is selected
+            wx.MessageBox('You must select a block before setting its input', \
+                          'Select a block first', wx.OK | wx.ICON_WARNING)
+            return None
+
+
+        ## get the block name
+        block_name = self.block_listbox.GetString(ind)
+        print("block_name = %s" % block_name)
+        ## get the actual block instance
+        block_instance = self.bd.get_block_by_name(block_name)
+        ## check that it is not an instance of pybd.no_input_block
+        if isinstance(block_instance, pybd.no_input_block):
+            msg = "The selected block has no inputs"
+            wx.MessageBox(msg, \
+                          'Selected block has no inputs', wx.OK | wx.ICON_WARNING)
+            return None
+
+        ## we have reached readiness with a valid block
+        block_list = self.get_block_names()
+        print("block_list: %s" % block_list)
+        dlg = SetInputsDialog(self, block_name, block_instance)
+
+        out = dlg.ShowModal()
+        print("out = %s" % out)
+        if out == 1:
+            # If the add block dialog returned 1, it
+            # called append_block_to_dict.
+            # guess the block placement, then draw
+            print("I should do something.")
+            self.on_draw_btn()
+            # need to place the new block
+
+        dlg.Destroy()
+
+
+         
 
     def load_params(self):
         """Load parameters for the gui from the txt file specified in
@@ -372,6 +431,7 @@ class Window(wx.Frame):
         #     - I think I need a listbox somewhere
         #     - should go on main page off to the right of the mpl panel
         self.block_listbox.Append(block_name)
+        
 
 
     def Destroy(self, *args, **kwargs):
