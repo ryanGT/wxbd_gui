@@ -75,44 +75,39 @@ from wxbd_gui.wx_add_actuator_or_sensor_dialog import AddActuatorDialog, \
 
 
 class AddBlockDialog(wx.Dialog): 
-    def __init__(self, parent, title): 
-        super(AddBlockDialog, self).__init__(parent, title = title, \
-                size=(700,500), \
-                style=wx.RESIZE_BORDER|wx.CAPTION|wx.CLOSE_BOX)#, size = (250,150)) 
-        panel = wx.Panel(self) 
-        self.panel = panel
+    def _make_main_sizers_and_panel(self):
+        self.panel = wx.Panel(self) 
+        self.fgsizer = wx.FlexGridSizer(9, 2, 5, 5)
+        self.wrapper = wx.BoxSizer(wx.VERTICAL)
+ 
 
-        self.parent = parent
-        self.bd = self.parent.bd
-
-        sizer = wx.FlexGridSizer(10, 2, 5, 5)
-        wrapper = wx.BoxSizer(wx.VERTICAL)
-        self.categories_choice = wx.Choice(panel,choices=pybd.block_categories)
-        self.block_type_list = wx.ListBox(panel, size = (100,-1), \
+    def make_widgets(self):
+        self.categories_choice = wx.Choice(self.panel,choices=pybd.block_categories)
+        self.block_type_list = wx.ListBox(self.panel, size = (100,-1), \
                                choices=[], style = wx.LB_SINGLE)
-        self.input_list = wx.ListBox(panel, size = (100,-1), \
+        self.input_list = wx.ListBox(self.panel, size = (100,-1), \
                                  choices=self.bd.block_name_list, \
                                  style = wx.LB_SINGLE)
         self.clear_button = wx.Button(self.panel, label="Clear Input")
 
        
-        self.block_name_box = wx.TextCtrl(panel)
+        self.block_name_box = wx.TextCtrl(self.panel)
 
-        sizer.AddMany([ (wx.StaticText(panel, label = "Block Category")),
-                        (wx.StaticText(panel, label = "Block Name")),
+        self.fgsizer.AddMany([ (wx.StaticText(self.panel, label = "Block Category")),
+                        (wx.StaticText(self.panel, label = "Block Name")),
                         (self.categories_choice, 0, wx.EXPAND),
                         (self.block_name_box, 0, wx.EXPAND),
-                        (wx.StaticText(panel, label = "Block Types")),
-                        (wx.StaticText(panel, label = "Input")),
+                        (wx.StaticText(self.panel, label = "Block Types")),
+                        (wx.StaticText(self.panel, label = "Input")),
                         (self.block_type_list, 0, wx.EXPAND),
                         (self.input_list, 0, wx.EXPAND),
-                        (wx.StaticText(panel, label = "")),
+                        (wx.StaticText(self.panel, label = "")),
                         (self.clear_button, 0, wx.ALL),
                        ])
     
-        sizer.AddGrowableCol(0, 1)
-        self.main_sizer = sizer 
-        wrapper.Add(sizer, 1, flag = wx.ALL | wx.EXPAND, border = 15)
+        self.fgsizer.AddGrowableCol(0, 1)
+        self.main_sizer = self.fgsizer 
+        self.wrapper.Add(self.fgsizer, 1, flag = wx.ALL | wx.EXPAND, border = 15)
         ## Buttons
         self.go_button = wx.Button(self.panel, label="Add Block")
         self.cancel_button = wx.Button(self.panel, label="Cancel")
@@ -121,7 +116,7 @@ class AddBlockDialog(wx.Dialog):
                          border=15)
         button_sizer.Add(self.go_button, wx.ALIGN_RIGHT,flag = wx.ALL, \
                          border=15)
-        wrapper.Add(button_sizer, 1, flag = wx.ALL, border = 15)
+        self.wrapper.Add(button_sizer, 1, flag = wx.ALL, border = 15)
 
         ## Params panels
         self.create_params_sizer_and_panel()
@@ -136,7 +131,7 @@ class AddBlockDialog(wx.Dialog):
         for name in input_names:
             setattr(self, name, None)
 
-        cat_ind = self.categories_choice.GetSelection()
+        cat_ind = 0#self.categories_choice.GetSelection()
         print("cat_ind: %s" % cat_ind)
         self.category_selected()
         self.Bind(wx.EVT_LISTBOX, self.on_block_type_choice, self.block_type_list) 
@@ -147,8 +142,21 @@ class AddBlockDialog(wx.Dialog):
         self.clear_button.Bind(wx.EVT_BUTTON, self.on_clear_button)
 
         self.Bind(wx.EVT_CLOSE, self.on_cancel_button)
-        panel.SetSizer(wrapper)
-        
+        self.panel.SetSizer(self.wrapper)
+
+
+
+
+    def __init__(self, parent, title): 
+        super(AddBlockDialog, self).__init__(parent, title = title, \
+                size=(700,500), \
+                style=wx.RESIZE_BORDER|wx.CAPTION|wx.CLOSE_BOX)#, size = (250,150)) 
+        self.parent = parent
+        self.bd = self.parent.bd
+        self._make_main_sizers_and_panel()
+        self.make_widgets()
+
+                
 
     
     def on_clear_button(self, event):
