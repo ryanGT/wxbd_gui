@@ -149,13 +149,18 @@ class AddBlockDialog(wx.Dialog):
 
     def __init__(self, parent, title): 
         super(AddBlockDialog, self).__init__(parent, title = title, \
-                size=(700,500), \
+                size=(700,550), \
                 style=wx.RESIZE_BORDER|wx.CAPTION|wx.CLOSE_BOX)#, size = (250,150)) 
         self.parent = parent
         self.bd = self.parent.bd
         self._make_main_sizers_and_panel()
         self.make_widgets()
 
+
+    def deselect_inputs(self):
+        inds = self.input_list.GetSelections()
+        for ind in inds:
+            self.input_list.Deselect(ind)
                 
 
     
@@ -237,6 +242,14 @@ class AddBlockDialog(wx.Dialog):
             # - one sensor or two
             #     - must have at least one sensor to be a plant
             if block_type not in pybd.plants_with_no_actuators_names:
+                print("plant has an actuator")
+                out = self.onAddActuator()
+                print("out = %s" % out)
+                if out != 1:
+                    # users cancelled actuator creation dialog
+                    # - do nothing
+                    return None
+
                 kwargs['actuator'] = self.actuator
                 has_act = 1
 
@@ -254,6 +267,15 @@ class AddBlockDialog(wx.Dialog):
                 #kwargs['sensor2'] = sensor2                
             else:
                 # it has only one sensor
+                out = self.onAddSensor()
+                print("out = %s" % out)
+                if out != 1:
+                    # users cancelled sensor creation dialog
+                    # - do nothing
+                    return None
+                # if out == 1, then self.sensor has been set with the 
+                # sensor instance
+
                 kwargs['sensor'] = self.sensor
                 has_sense_1 = 1
 
@@ -284,7 +306,7 @@ class AddBlockDialog(wx.Dialog):
         self.EndModal(0)
 
 
-    def onAddActuator(self, event):
+    def onAddActuator(self, event=None):
         dlg = AddActuatorDialog(self, "Add Actuator Dialog")
         out = dlg.ShowModal()
         print("out = %s" % out)
@@ -303,7 +325,7 @@ class AddBlockDialog(wx.Dialog):
         return out
 
 
-    def onAddSensor(self, event):
+    def onAddSensor(self, event=None):
         dlg = AddSensorDialog(self, "Add Sensor Dialog")
         out = dlg.ShowModal()
         print("out = %s" % out)
@@ -322,73 +344,85 @@ class AddBlockDialog(wx.Dialog):
         return out
 
 
+#    def _create_new_block(self, block_type, block_name, mydict):
+#        block_class = getattr(pybd, block_type)
+#
+#        if block_type in pybd.plant_class_names:
+#            # we need to handle plant classes with no actuator and those with two sensors
+#            print("this is a plant")
+#
+#            # possible cases:
+#            # - actuator or no actuator
+#            # - one sensor or two
+#            #     - must have at least one sensor to be a plant
+#            if block_type not in pybd.plants_with_no_actuators_names:
+#                # it has an actuator
+#                print("plant has an actuator")
+#                out = self.onAddActuator(event)
+#                print("out = %s" % out)
+#                if out != 1:
+#                    # users cancelled actuator creation dialog
+#                    # - do nothing
+#                    return None
+#                # if out == 1, then self.actuator has been set with the 
+#                # actuator instance
+#
+#            if block_type in pybd.plants_with_two_sensors_names:
+#                ## handle this eventually
+#                pass
+#            #    # it has two sensors
+#            #    sensor1_name = self.sensors_var.get()
+#            #    print("sensor1_name: %s" % sensor1_name)
+#            #    sensor2_name = self.sensor2_var.get()
+#            #    print("sensor2_name: %s" % sensor2_name)
+#            #    sensor1 = self.bd.get_sensor_by_name(sensor1_name)                
+#            #    kwargs['sensor1'] = sensor1
+#            #    sensor2 = self.bd.get_sensor_by_name(sensor2_name)                
+#            #    kwargs['sensor2'] = sensor2                
+#            else:
+#                print("plant has an actuator")
+#                out = self.onAddSensor(event)
+#                print("out = %s" % out)
+#                if out != 1:
+#                    # users cancelled sensor creation dialog
+#                    # - do nothing
+#                    return None
+#                # if out == 1, then self.sensor has been set with the 
+#                # sensor instance
+#
+#            #    # it has only one sensor
+#            #    sensor_name = self.sensors_var.get()
+#            #    print("sensor_name: %s" % sensor_name)
+#            #    mysensor = self.bd.get_sensor_by_name(sensor_name)
+#            #    kwargs['sensor'] = mysensor
+#
+#
+#        new_block = pybd.create_block(block_class, block_type, \
+#                block_name, **kwargs)
+#        return new_block 
 
-    def on_go_button(self, event):
+
+    def get_block_type_and_name(self):
         ind = self.block_type_list.GetSelection()
         block_type = self.block_type_list.GetString(ind)
+        block_name = self.block_name_box.GetValue()
+        return block_type, block_name
+
+ 
+
+    def on_go_button(self, event):
         mydict = self.read_params_from_boxes()
         print("mydict = %s" % mydict)
-        block_name = self.block_name_box.GetValue()
-        # if we are about to create a plant, we need to do something
+        block_type, block_name = self.get_block_type_and_name()
+         # if we are about to create a plant, we need to do something
         # - does it need an actuator?
         #     - more than one?
         # - does it need a sensor?
         #     - more than one?
-        block_class = getattr(pybd, block_type)
-        # how do I handle cases with input(s) set?
+                # how do I handle cases with input(s) set?
 
         # get actuator and sensor if it is a plant
-        print("plant classes: %s" % pybd.plant_class_names)
-        if block_type in pybd.plant_class_names:
-            # we need to handle plant classes with no actuator and those with two sensors
-            print("this is a plant")
-
-            # possible cases:
-            # - actuator or no actuator
-            # - one sensor or two
-            #     - must have at least one sensor to be a plant
-            if block_type not in pybd.plants_with_no_actuators_names:
-                # it has an actuator
-                print("plant has an actuator")
-                out = self.onAddActuator(event)
-                print("out = %s" % out)
-                if out != 1:
-                    # users cancelled actuator creation dialog
-                    # - do nothing
-                    return None
-                # if out == 1, then self.actuator has been set with the 
-                # actuator instance
-
-            if block_type in pybd.plants_with_two_sensors_names:
-                ## handle this eventually
-                pass
-            #    # it has two sensors
-            #    sensor1_name = self.sensors_var.get()
-            #    print("sensor1_name: %s" % sensor1_name)
-            #    sensor2_name = self.sensor2_var.get()
-            #    print("sensor2_name: %s" % sensor2_name)
-            #    sensor1 = self.bd.get_sensor_by_name(sensor1_name)                
-            #    kwargs['sensor1'] = sensor1
-            #    sensor2 = self.bd.get_sensor_by_name(sensor2_name)                
-            #    kwargs['sensor2'] = sensor2                
-            else:
-                print("plant has an actuator")
-                out = self.onAddSensor(event)
-                print("out = %s" % out)
-                if out != 1:
-                    # users cancelled sensor creation dialog
-                    # - do nothing
-                    return None
-                # if out == 1, then self.sensor has been set with the 
-                # sensor instance
-
-            #    # it has only one sensor
-            #    sensor_name = self.sensors_var.get()
-            #    print("sensor_name: %s" % sensor_name)
-            #    mysensor = self.bd.get_sensor_by_name(sensor_name)
-            #    kwargs['sensor'] = mysensor
-
-
+        #print("plant classes: %s" % pybd.plant_class_names)
         new_block = self._create_new_block(block_type, block_name, mydict)
         self.parent.append_block_to_dict(block_name, new_block)
         self.EndModal(1)
@@ -618,5 +652,193 @@ class AddBlockDialog(wx.Dialog):
         #self.set_default_params(param_list, default_params)
         return param_list, default_params
             
+
+
+
+class ReplaceBlockDialog(AddBlockDialog):
+    def make_widgets(self):
+        replace_label = wx.StaticText(self.panel, label = "Block to Replace")
+        self.replace_choice = wx.Choice(self.panel,choices=self.bd.block_name_list)
+
+        empty1 = wx.StaticText(self.panel, label = "")
+        empty2 = wx.StaticText(self.panel, label = "")
+
+        self.fgsizer.AddMany([ (replace_label, 0, wx.LEFT|wx.RIGHT|wx.TOP), \
+                               (empty1, 0), \
+                               (self.replace_choice, 0, \
+                                wx.LEFT|wx.RIGHT|wx.TOP|wx.EXPAND),
+                               (empty2, 0)])
+        AddBlockDialog.make_widgets(self)
+        self.go_button.SetLabel("Replace Block")
+        self.replace_choice.SetSelection(0)
+        self.replace_choice.Bind(wx.EVT_CHOICE, self.on_replacement_selected)
+        self.on_replacement_selected()
+
+
+
+    def _get_old_block_name(self):
+        ind = self.replace_choice.GetSelection()
+        old_name = self.replace_choice.GetString(ind)
+        return old_name
+
+
+    def on_replacement_selected(self, *args, **kwargs):
+        # what needs to actually happen here?
+        # - copy any info from the block to replace into a kwargs dict
+        # - the new block should have the same input(s) and placement info
+        #   as the block it is replacing
+        # - is there anything else to copy over?
+        print("in on_replacement_selected")
+        # if the old block has inputs, set the input widget values here
+        self.old_block_name = self._get_old_block_name()
+        print("self.old_block_name = %s" % self.old_block_name)
+        self.old_block = self.bd.get_block_by_name(self.old_block_name)
+        #self.input_block1 = input_block1
+        has_input = 0
+        if hasattr(self.old_block, "input_block1_name"):
+            input1_name = self.old_block.input_block1_name
+            if input1_name:
+                #selection_clear(0, END), then selection_set
+                #mylist = self.input_choice.get(0, "end")
+                #ind = int(mylist.index(input1_name))
+                #self.input_choice.selection_set(ind)
+                #-----
+                #
+                # What is the wxPython way to do this?
+                #
+                #-----
+                ind = self.input_list.FindString(input1_name)
+                self.input_list.SetSelection(ind)
+                has_input = 1
+        
+        if not has_input:
+            # clear selection
+            self.deselect_inputs()
+
+
+    def get_input_names(self):
+        input_kwargs = {}
+        for i in range(1,3):
+            attr = "input_block%i_name" % i
+            if hasattr(self.old_block, attr):
+                val = getattr(self.old_block, attr)
+                input_kwargs[attr] = val
+        self.input_kwargs = input_kwargs
+
+
+    def get_old_position_info(self):
+        placement_kwargs = {}
+        if hasattr(self.old_block, "placement_type") and self.old_block.placement_type:
+            pt = self.old_block.placement_type
+            placement_kwargs['placement_type'] = pt
+            if pt == 'absolute':
+                mykeys = ['abs_x','abs_y']
+            else:
+                mykeys = ['rel_block_name','rel_pos','rel_distance','xshift','yshift']
+            
+            for key in mykeys:
+                attr = getattr(self.old_block, key)
+                placement_kwargs[key] = attr
+
+        self.placement_kwargs = placement_kwargs
+        return self.placement_kwargs
+
+
+
+
+    def set_inputs(self, new_block):
+        for i in range(1,3):
+            attr = "input_block%i_name" % i
+            if attr in self.input_kwargs:
+                name = self.input_kwargs[attr]
+                if name:
+                    # the defaults inherited from block might nead to an empty
+                    # name
+                    # - if the input is a sensor, this breaks:
+                    if self.parent.bd.has_block(name):
+                        in_block = self.parent.bd.get_block_by_name(name)
+                    else:
+                        # hope the other option is true
+                        in_block = self.parent.bd.get_sensor_by_name(name)
+
+                    method_name = "set_input_block%i" % i
+                    if hasattr(new_block, method_name):
+                        mymethod = getattr(new_block, method_name)
+                        mymethod(in_block)
+     
+
+
+    def place_new_block(self, new_block, place_dict):
+        # Next step:
+        # - read parameters from the numbered param boxes for kwargs
+        # - kwargs are handled by self._create_new_block, which mostly reads
+        #   from the widgets
+        # - if we want to pass kwargs from old block to new block, we should
+        #   probably pass those values to the widgets as an intermediate step
+        # - placement stuff needs to be handled separately
+        #
+        # Conceptual question: do I force the new block to have the same
+        # input(s) as the old block?
+        #import pdb
+        #pdb.set_trace()
+        #place_dict = copy.copy(self.placement_kwargs)
+        pt = place_dict.pop('placement_type')
+
+        print("place_dict = %s" % place_dict)
+
+        if pt == 'absolute':
+            # get abs kwargs
+            #place_absolute(self, x=None, y=None):
+            x_abs = place_dict['abs_x']
+            y_abs = place_dict['abs_y']
+            new_block.place_absolute(x=x_abs, y=y_abs)
+        elif pt == 'relative':
+            rel_block_name = place_dict.pop('rel_block_name')
+            if rel_block_name in self.parent.bd.block_dict:
+                rel_block = self.parent.get_block_by_name(rel_block_name)
+                new_block.place_relative(rel_block, **place_dict)
+        else:
+            pt_str = pt.strip()
+            if pt_str:
+                raise ValueError("placement type not understood: %s" % pt_str)
+            
+        # - handle input(s)
+        # get_block_by_name
+        # set_input_block1
+        # set_input_block2
+        # - handled placement
+        # - find all references in self.parent.bd and replace them:
+        # When this is done, how to I verify that the dict is right and 
+        # the name of the new_block matches the old_block and all 
+        # references have updated?
+        #self.destroy()
+
+
+
+    def on_go_button(self, event):
+        print("I should do something.")
+        mydict = self.read_params_from_boxes()
+        print("mydict = %s" % mydict)
+        block_type, block_name = self.get_block_type_and_name()
+         # if we are about to create a plant, we need to do something
+        # - does it need an actuator?
+        #     - more than one?
+        # - does it need a sensor?
+        #     - more than one?
+                # how do I handle cases with input(s) set?
+
+        # get actuator and sensor if it is a plant
+        #print("plant classes: %s" % pybd.plant_class_names)
+        new_block = self._create_new_block(block_type, block_name, mydict)
+
+        self.get_input_names()
+        self.set_inputs(new_block)
+        self.get_old_position_info()
+        place_dict = copy.copy(self.placement_kwargs)
+        self.place_new_block(new_block, place_dict)
+        self.parent.bd.replace_block(self.old_block, new_block)
+        self.parent.update_block_list()
+
+        self.EndModal(1)
 
 

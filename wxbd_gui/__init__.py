@@ -41,9 +41,10 @@ ERR_TOL = 1e-5  # floating point slop for peak-detection
 ## - generate code
 
 
-from wxbd_gui.wx_add_block_dialog import AddBlockDialog
+from wxbd_gui.wx_add_block_dialog import AddBlockDialog, ReplaceBlockDialog
 from wxbd_gui.wx_add_actuator_or_sensor_dialog import AddActuatorDialog
 from wxbd_gui.wx_set_inputs_dialog import SetInputsDialog
+from wxbd_gui.wx_menu_params_dialog import MenuParamsDialog
 
 import py_block_diagram as pybd
 
@@ -193,11 +194,20 @@ class Window(wx.Frame):
                                        "Add a new block to the block diagram system")
         setInputsMenuItem = blockMenu.Append(wx.Window.NewControlId(), \
                         "Set Input(s)", "Specify the input(s) for a block")
+        ReplaceBlockMenuItem = blockMenu.Append(wx.Window.NewControlId(), \
+                                                "Replace Block",
+                                       "Replace a block in the block diagram system")
+
+        sysMenu = wx.Menu()
+        menuParamsMenuItem = sysMenu.Append(wx.Window.NewControlId(), \
+                    "Set Menu Params", \
+                    "Choose which parameters should be requested each time before running a test")
+
         #addActuatorMenuItem = blockMenu.Append(wx.Window.NewControlId(), "Add Actuator",
         #                               "Add a new block to the block diagram system")
 
         menuBar.Append(blockMenu, "&Block")
-
+        menuBar.Append(sysMenu, "&System")
 
         menuBar.Append(code_gen_menu, "&Code Generation")
 
@@ -206,6 +216,7 @@ class Window(wx.Frame):
         self.Bind(wx.EVT_MENU, self.onSave, SaveMenuItem)
         self.Bind(wx.EVT_MENU, self.onLoad, LoadMenuItem)
         self.Bind(wx.EVT_MENU, self.onAddBlock, addBlockMenuItem)
+        self.Bind(wx.EVT_MENU, self.onReplaceBlock, ReplaceBlockMenuItem)
         self.Bind(wx.EVT_MENU, self.onSetInputs, setInputsMenuItem)
         self.Bind(wx.EVT_MENU, self.on_set_arduino_tempalate, \
                   set_arduino_template_MenuItem)
@@ -215,6 +226,7 @@ class Window(wx.Frame):
                 set_arduino_output_MenuItem)
         self.Bind(wx.EVT_MENU, self.on_arduino_codegen_menu, \
                 gen_arduino_code_MenuItem)
+        self.Bind(wx.EVT_MENU, self.on_menu_params, menuParamsMenuItem)
         #self.Bind(wx.EVT_MENU, self.onAddActuator, addActuatorMenuItem)
 
         self.SetMenuBar(menuBar)
@@ -237,6 +249,22 @@ class Window(wx.Frame):
 
         self.Centre() 
         self.Show(True)
+
+
+
+    def on_menu_params(self, event):
+        dlg = MenuParamsDialog(self, "Menu Parameters Dialog")
+        out = dlg.ShowModal()
+        print("out = %s" % out)
+        if out == 1:
+            # If the add block dialog returned 1, it
+            # called append_block_to_dict.
+            # guess the block placement, then draw
+            print("I should menu.")
+            # need to place the new block
+            #self.on_draw_btn()
+
+        dlg.Destroy()
 
 
     def get_block_names(self):
@@ -519,6 +547,23 @@ class Window(wx.Frame):
 
 
 
+    def onReplaceBlock(self, event):
+        """"""
+        dlg = ReplaceBlockDialog(self, "Replace Block Dialog")
+        out = dlg.ShowModal()
+        print("out = %s" % out)
+        if out == 1:
+            # If the add block dialog returned 1, it
+            # called append_block_to_dict.
+            # guess the block placement, then draw
+            print("I should draw something.")
+            # need to place the new block
+            self.on_draw_btn()
+
+        dlg.Destroy()
+
+
+
     def onAddBlock(self, event):
         """"""
         dlg = AddBlockDialog(self, "Add Block Dialog")
@@ -533,6 +578,8 @@ class Window(wx.Frame):
             self.on_draw_btn()
 
         dlg.Destroy()
+
+
 
 
          
