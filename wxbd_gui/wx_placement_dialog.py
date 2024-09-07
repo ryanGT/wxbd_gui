@@ -151,6 +151,21 @@ class AbsPanel(RelativePanel):
     def make_widgets(self):
         btn = wx.Button(self, label="Place Absolute")
         sizer = wx.BoxSizer(wx.VERTICAL)
+
+        def add_pair(topitem, bottomitem):
+            sizer.Add(topitem, 0, not_bottom, 10) 
+            sizer.Add(bottomitem, 0, not_top, 10)
+
+        x_label = wx.StaticText(self, label = "abs x") 
+        self.abs_x_box = wx.TextCtrl(self, size=(50,-1))
+        add_pair(x_label, self.abs_x_box)
+        y_label = wx.StaticText(self, label = "abs y") 
+        self.abs_y_box = wx.TextCtrl(self, size=(50,-1))
+        add_pair(y_label, self.abs_y_box) 
+
+        self.abs_x_box.SetValue("0")
+        self.abs_y_box.SetValue("0")
+ 
         sizer.Add(btn, 0, wx.ALL, 10)
         self.SetSizer(sizer)
 
