@@ -9,7 +9,7 @@ import matplotlib.cbook as cbook
 import matplotlib.cm as cm
 from matplotlib.figure import Figure
 
-from krauss_misc import txt_mixin 
+from krauss_misc import txt_mixin, rwkos
 ## ToDo:
 ##
 ## - make option to specify input(s) later
@@ -45,7 +45,7 @@ from wxbd_gui.wx_add_block_dialog import AddBlockDialog, ReplaceBlockDialog
 from wxbd_gui.wx_add_actuator_or_sensor_dialog import AddActuatorDialog
 from wxbd_gui.wx_set_inputs_dialog import SetInputsDialog
 from wxbd_gui.wx_menu_params_dialog import MenuParamsDialog
-
+from wxbd_gui.wx_placement_dialog import PlacementDialog
 import py_block_diagram as pybd
 
 
@@ -197,6 +197,10 @@ class Window(wx.Frame):
         ReplaceBlockMenuItem = blockMenu.Append(wx.Window.NewControlId(), \
                                                 "Replace Block",
                                        "Replace a block in the block diagram system")
+        editPlacementMenuItem = blockMenu.Append(wx.Window.NewControlId(), \
+                                                "Editted Block Placement",
+                                       "Change where a block is placed on the block diagram")
+ 
 
         sysMenu = wx.Menu()
         menuParamsMenuItem = sysMenu.Append(wx.Window.NewControlId(), \
@@ -216,6 +220,7 @@ class Window(wx.Frame):
         self.Bind(wx.EVT_MENU, self.onSave, SaveMenuItem)
         self.Bind(wx.EVT_MENU, self.onLoad, LoadMenuItem)
         self.Bind(wx.EVT_MENU, self.onAddBlock, addBlockMenuItem)
+        self.Bind(wx.EVT_MENU, self.onEditPlacement, editPlacementMenuItem)
         self.Bind(wx.EVT_MENU, self.onReplaceBlock, ReplaceBlockMenuItem)
         self.Bind(wx.EVT_MENU, self.onSetInputs, setInputsMenuItem)
         self.Bind(wx.EVT_MENU, self.on_set_arduino_tempalate, \
@@ -388,6 +393,16 @@ class Window(wx.Frame):
 
         if dlg.ShowModal() == wx.ID_OK:
             pathout = dlg.GetPath()
+            # get rid of spaces in the final folder name
+            rest, folder = os.path.split(pathout)
+            clean_folder = rwkos.clean_filename(folder)
+            if clean_folder != folder:
+                print("clean_folder = %s" % clean_folder)
+                curdir = os.getcwd()
+                os.chdir(rest)
+                os.rmdir(folder)
+                os.mkdir(clean_folder)
+                pathout = os.path.join(rest, clean_folder)
             self.arduino_output_folder = pathout
         else:
             pathout = None
@@ -562,6 +577,21 @@ class Window(wx.Frame):
 
         dlg.Destroy()
 
+
+    def onEditPlacement(self, event):
+        """"""
+        dlg = PlacementDialog(self, "Add Block Dialog")
+        out = dlg.ShowModal()
+        print("out = %s" % out)
+        if out == 1:
+            # If the add block dialog returned 1, it
+            # called append_block_to_dict.
+            # guess the block placement, then draw
+            print("Updating drawing")
+            # need to place the new block
+            self.on_draw_btn()
+
+        dlg.Destroy()
 
 
     def onAddBlock(self, event):
