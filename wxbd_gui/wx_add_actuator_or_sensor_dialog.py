@@ -126,6 +126,7 @@ class AddActuatorDialog(wx.Dialog):
 
         self.set_params_labels(params)
         m = len(params)
+        print("m = %s" % m)
         self.hide_panels(m)
         self.show_panels(m)
         self.set_params_labels(params)
@@ -141,6 +142,9 @@ class AddActuatorDialog(wx.Dialog):
         # save things for other methods
         self.chosen_type = chosen_type
         #self.param_list = param_list
+        self.panel.Layout()
+        self.panel.Update()
+
 
 
     def on_cancel_button(self, event):
@@ -246,7 +250,7 @@ class AddActuatorDialog(wx.Dialog):
 
     def show_panels(self, m):
         for i in range(m):
-            print("i = %i" %i)
+            print("showing i = %i" %i)
             curpanel = self.params_panels[i]
             curpanel.Show()
             curpanel.Layout()
