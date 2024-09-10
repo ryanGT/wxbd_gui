@@ -1,5 +1,7 @@
 import wx
 
+version = '1.0.2'
+
 import numpy as np
 import os, shutil, re, sys
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
@@ -67,7 +69,7 @@ class PlotPanel(wx.Panel):
     def __init__(self, parent):
         super().__init__(parent, -1)
 
-        self.fig = Figure((5, 4), 75)
+        self.fig = Figure((9, 7), 75)
         self.canvas = FigureCanvas(self, -1, self.fig)
         #self.toolbar = NavigationToolbar(self.canvas)  # matplotlib toolbar
         #self.toolbar.Realize()
@@ -125,9 +127,9 @@ class Window(wx.Frame):
     def __init__(self, title):
         super().__init__(parent = None, title = title, size=(900,600))
         panel = wx.Panel(self)
- 
+
         wrapper = wx.BoxSizer(wx.VERTICAL)
- 
+
         sizer = wx.FlexGridSizer(3, 2, 5, 5)
 
         self.plotpanel = PlotPanel(panel)
@@ -142,12 +144,12 @@ class Window(wx.Frame):
                         (wx.StaticText(panel, label = "Blocks")),
                         (self.plotpanel, 0, wx.EXPAND), \
                         (self.block_listbox, 0, wx.EXPAND)])
- 
+
         sizer.AddGrowableRow(1, 1)
         sizer.AddGrowableCol(0, 1)
- 
+
         wrapper.Add(sizer, 1, flag = wx.ALL | wx.EXPAND, border = 15)
- 
+
         panel.SetSizer(wrapper)
 
         menuBar = wx.MenuBar()
@@ -161,6 +163,11 @@ class Window(wx.Frame):
                                        "Load block diagram model from a .csv file")
         exitMenuItem = fileMenu.Append(wx.Window.NewControlId(), "Exit", \
                                        "Exit the application")
+
+        about_menu = wx.Menu()
+        versionMenuItem = about_menu.Append(wx.Window.NewControlId(), \
+                                            "Show Version", \
+                                            "Show versions message")
 
         a_tbl = wx.AcceleratorTable([(wx.ACCEL_CTRL,  ord('L'), load_id ), \
                                      (wx.ACCEL_CTRL,  ord('S'), save_id )])
@@ -187,7 +194,7 @@ class Window(wx.Frame):
 
         menuBar.Append(fileMenu, "&File")
 
-        
+
 
         blockMenu = wx.Menu()
         addBlockMenuItem = blockMenu.Append(wx.Window.NewControlId(), "Add Block",
@@ -200,7 +207,7 @@ class Window(wx.Frame):
         editPlacementMenuItem = blockMenu.Append(wx.Window.NewControlId(), \
                                                 "Editted Block Placement",
                                        "Change where a block is placed on the block diagram")
- 
+
 
         sysMenu = wx.Menu()
         menuParamsMenuItem = sysMenu.Append(wx.Window.NewControlId(), \
@@ -214,8 +221,9 @@ class Window(wx.Frame):
         menuBar.Append(sysMenu, "&System")
 
         menuBar.Append(code_gen_menu, "&Code Generation")
+        menuBar.Append(about_menu, "&About")
 
-  
+
         self.Bind(wx.EVT_MENU, self.onExit, exitMenuItem)
         self.Bind(wx.EVT_MENU, self.onSave, SaveMenuItem)
         self.Bind(wx.EVT_MENU, self.onLoad, LoadMenuItem)
@@ -232,10 +240,11 @@ class Window(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_arduino_codegen_menu, \
                 gen_arduino_code_MenuItem)
         self.Bind(wx.EVT_MENU, self.on_menu_params, menuParamsMenuItem)
+        self.Bind(wx.EVT_MENU, self.on_show_versions, versionMenuItem)
         #self.Bind(wx.EVT_MENU, self.onAddActuator, addActuatorMenuItem)
 
         self.SetMenuBar(menuBar)
-        
+
         self.bd = pybd.block_diagram()
 
         self.colorful_wires = 1
@@ -252,8 +261,16 @@ class Window(wx.Frame):
         self.load_params()
 
 
-        self.Centre() 
+        self.Centre()
         self.Show(True)
+
+
+
+    def on_show_versions(self, *args, **kwargs):
+        line1 = "wxbd_gui version: %s" % version
+        line2 = "python_block_diagram version: %s" % pybd.version
+        msg = "\n".join([line1, line2])
+        wx.MessageBox(msg, "Softare Versions", wx.OK | wx.ICON_WARNING)
 
 
 
@@ -278,7 +295,7 @@ class Window(wx.Frame):
         for row in range(count):
             item = self.block_listbox.GetString(row)
             mylist.append(item)
-        
+
         return mylist
 
 
@@ -323,7 +340,7 @@ class Window(wx.Frame):
         dlg.Destroy()
 
 
-         
+
 
     def load_params(self):
         """Load parameters for the gui from the txt file specified in
@@ -406,7 +423,7 @@ class Window(wx.Frame):
             self.arduino_output_folder = pathout
         else:
             pathout = None
-    
+
         dlg.Destroy()
 
 
@@ -430,11 +447,11 @@ class Window(wx.Frame):
             msg = "Arduino Template Path:\n%s" % self.arduino_template_path
         else:
             msg = "Arduino Template Path Not Set"
-        wx.MessageBox(msg, 'Info', wx.OK | wx.ICON_INFORMATION) 
+        wx.MessageBox(msg, 'Info', wx.OK | wx.ICON_INFORMATION)
 
 
     def on_arduino_codegen_menu(self, event):
-        ## I dunno, maybe we need to do something before calling 
+        ## I dunno, maybe we need to do something before calling
         ## the real codegen; or maybe call codegen without the
         ## menu call.....
         self.arduino_codegen()
@@ -443,16 +460,16 @@ class Window(wx.Frame):
     def arduino_codegen(self):
         msg1 = "Arduino Template Path not Set"
         if not hasattr(self, "arduino_template_path"):
-            wx.MessageBox(msg1, 'Info', wx.OK | wx.ICON_INFORMATION) 
+            wx.MessageBox(msg1, 'Info', wx.OK | wx.ICON_INFORMATION)
         elif not self.arduino_template_path:
-            wx.MessageBox(msg1, 'Info', wx.OK | wx.ICON_INFORMATION) 
-        
+            wx.MessageBox(msg1, 'Info', wx.OK | wx.ICON_INFORMATION)
+
         msg2 = "Arduino output folder not set"
         if not hasattr(self, "arduino_output_folder"):
-            wx.MessageBox(msg2, 'Info', wx.OK | wx.ICON_INFORMATION) 
+            wx.MessageBox(msg2, 'Info', wx.OK | wx.ICON_INFORMATION)
         elif not self.arduino_output_folder:
-            wx.MessageBox(msg2, 'Info', wx.OK | wx.ICON_INFORMATION) 
-       
+            wx.MessageBox(msg2, 'Info', wx.OK | wx.ICON_INFORMATION)
+
         rest, output_name = os.path.split(self.arduino_output_folder)
 
         self.bd.generate_arduino_code(output_name, \
@@ -460,7 +477,7 @@ class Window(wx.Frame):
                                       output_folder=rest, \
                                       )
 
-			
+
     def append_block_to_dict(self, block_name, new_block):
         self.bd.append_block_to_dict(block_name, new_block)
         success_place = self.bd.guess_block_placement(block_name, new_block)
@@ -474,7 +491,7 @@ class Window(wx.Frame):
         #     - I think I need a listbox somewhere
         #     - should go on main page off to the right of the mpl panel
         self.block_listbox.Append(block_name)
-        
+
 
 
     def Destroy(self, *args, **kwargs):
@@ -499,7 +516,7 @@ class Window(wx.Frame):
         self.save_params()
         self.Close()
 
-    
+
     def on_save_as_menu(self, *args, **kwargs):
         saveFileDialog = wx.FileDialog(self, "Save Block Diagram to CSV file", "", "",
                                    "CSV files (*.csv)|*.csv", wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
@@ -528,7 +545,7 @@ class Window(wx.Frame):
     def update_block_list(self):
         block_list = self.bd.block_name_list
         self.block_listbox.Clear()
-        self.block_listbox.InsertItems(block_list,0)	
+        self.block_listbox.InsertItems(block_list,0)
 
 
 
@@ -612,7 +629,7 @@ class Window(wx.Frame):
 
 
 
-         
+
     def on_draw_btn(self, *args, **kwargs):
         print("you pressed draw")
         ax = self.plotpanel.ax
@@ -624,9 +641,17 @@ class Window(wx.Frame):
             self.bd.ax = ax
             self.bd.draw(colorful_wires=self.colorful_wires)
 
+            xlims = self.bd.get_xlims()
+            ylims = self.bd.get_ylims()
+
+
             try:
                 xlims = self.bd.get_xlims()
                 ylims = self.bd.get_ylims()
+                #ylims[0] -= 5
+                print("xlims: %s" % xlims)
+                print("ylims: %s" % ylims)
+
                 ax.set_xlim(xlims)
                 ax.set_ylim(ylims)
                 #self.xmin_var.set(str(xlims[0]))
@@ -655,4 +680,4 @@ class Window(wx.Frame):
 
         dlg.Destroy()
 
-        
+

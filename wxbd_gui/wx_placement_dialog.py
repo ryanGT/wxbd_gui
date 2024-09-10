@@ -87,6 +87,64 @@ class RelativePanel(wx.Panel):
         self.relative_block.Insert(self.other_names, 0)
 
 
+    def get_rel_block_name(self):
+        ind =  self.relative_block.GetSelection()
+        relname = self.relative_block.GetString(ind)
+        return relname
+
+
+    def get_rel_dir(self):
+        ind = self.relative_dir.GetSelection()
+        reldir = self.relative_dir.GetString(ind)
+        return reldir
+
+
+
+    def set_relative_block_by_name(self, relblockname):
+        ind = self.relative_block.FindString(relblockname)
+        self.relative_block.SetSelection(ind)
+
+
+
+    def set_relative_dir(self, dirstring):
+        ind = self.relative_dir.FindString(dirstring)
+        self.relative_dir.SetSelection(ind)
+
+
+    def set_rel_dist(self, dist):
+        self.dist_box.SetValue(str(dist))
+
+
+    def set_xshift(self, shift):
+        self.xshift_box.SetValue(str(shift))
+
+
+    def set_yshift(self, shift):
+        self.yshift_box.SetValue(str(shift))
+
+
+
+    def get_float_from_box(self, attr):
+        widget = getattr(self, attr)
+        mystr = widget.GetValue()
+        myfloat = float(mystr)
+        return myfloat
+
+
+    def on_btn(self, *args, **kwargs):
+        block_instance = self.parent.get_block_instance()
+        rel_block_name = self.get_rel_block_name()
+        rel_block = self.parent.bd.get_block_by_name(rel_block_name)
+        rel_pos = self.get_rel_dir().lower()
+        rel_dist = self.get_float_from_box("dist_box")
+        xshift = self.get_float_from_box("xshift_box")
+        yshift = self.get_float_from_box("yshift_box")
+
+        block_instance.place_relative(rel_block=rel_block, rel_pos=rel_pos, rel_distance=rel_dist, \
+                                      xshift=xshift, yshift=yshift)
+        self.parent.EndModal(1)
+        
+
     #----------------------------------------------------------------------
     def make_widgets(self):
         self.relative_block = wx.Choice(self, \
@@ -131,6 +189,10 @@ class RelativePanel(wx.Panel):
         add_pair(yshift_label, self.yshift_box)
 
 
+
+        self.btn.Bind(wx.EVT_BUTTON, self.on_btn)
+
+
         sizer.Add(self.btn, 0, wx.ALL, 10)
         self.SetSizer(sizer)
 
@@ -165,9 +227,38 @@ class AbsPanel(RelativePanel):
 
         self.abs_x_box.SetValue("0")
         self.abs_y_box.SetValue("0")
+
+        self.btn = btn
+        self.btn.Bind(wx.EVT_BUTTON, self.on_btn)
  
         sizer.Add(btn, 0, wx.ALL, 10)
         self.SetSizer(sizer)
+
+
+
+    def on_btn(self, *args, **kwargs):
+        block_instance = self.parent.get_block_instance()
+        x = self.get_abs_x()
+        y = self.get_abs_y()
+        block_instance.place_absolute(x,y)
+        self.parent.EndModal(1)
+
+
+    def set_abs_x(self, val):
+        self.abs_x_box.SetValue(str(val))
+
+
+    def set_abs_y(self, val):
+        self.abs_y_box.SetValue(str(val))
+
+
+    def get_abs_x(self):
+        return float(self.abs_x_box.GetValue())
+
+
+    def get_abs_y(self):
+        return float(self.abs_y_box.GetValue())
+
 
 
     def __init__(self, parent, real_parent):
@@ -210,6 +301,9 @@ class PlacementDialog(wx.Dialog):
         notebook.AddPage(abspanel, "Absolute")
         self.notebook = notebook
 
+        self.abspanel = abspanel
+        self.relpanel = relpanel
+
         self.fgsizer.AddMany([ (block_label, 0, wx.LEFT|wx.RIGHT|wx.TOP), \
                                (self.block_choice, 0, \
                                 wx.LEFT|wx.RIGHT|wx.TOP),
@@ -222,6 +316,9 @@ class PlacementDialog(wx.Dialog):
 
         self.main_sizer = self.fgsizer 
         self.wrapper.Add(self.fgsizer, 1, flag = wx.ALL | wx.EXPAND, border = 15)
+        ## Bind block_choice
+        ## - load current placement stuff from the block instance
+        self.block_choice.Bind(wx.EVT_CHOICE, self.on_block_selected)
         ## Buttons
         #self.go_button.Bind(wx.EVT_BUTTON, self.on_go_button)
         #self.cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel_button)
@@ -232,6 +329,50 @@ class PlacementDialog(wx.Dialog):
 
 
 
+    def get_block_instance(self):
+        block_name = self.get_selected_block_name()
+        block_instance = self.bd.get_block_by_name(block_name)
+        return block_instance
+
+
+
+    def load_placement_params_from_block(self):
+        block_instance = self.get_block_instance()
+        # is it placed?
+        # - abs or rel?
+        # - other parameters
+        if block_instance.isplaced():
+            # for now, not doing anything if it isn't placed
+            # - maybe try to guess reasonable defaults in the future
+            # - but the software doesn't really allow the creation of an
+            #   unplaced block anymore
+            if block_instance.placement_type == 'absolute':
+                self.notebook.SetSelection(1)#self.abspanel)
+                self.abspanel.set_abs_x(block_instance.x)
+                self.abspanel.set_abs_y(block_instance.y)
+
+
+
+            elif block_instance.placement_type == 'relative':
+                self.notebook.SetSelection(0)#self.relpanel)
+                self.relpanel.set_relative_block_by_name(block_instance.rel_block_name)
+                self.relpanel.set_relative_dir(block_instance.rel_pos)
+                self.relpanel.set_rel_dist(block_instance.rel_distance)
+                self.relpanel.set_xshift(block_instance.xshift)
+                self.relpanel.set_yshift(block_instance.yshift)
+                #self.rel_block = rel_block
+                #self.rel_pos = rel_pos
+                #self.rel_distance = rel_distance
+                #self.xshift = xshift
+                #self.yshift = yshift
+        
+
+
+    def on_block_selected(self, *args, **kwargs):
+        print("in on_block_selected")
+        self.relpanel.set_relative_choices()
+        self.load_placement_params_from_block()
+
 
     def __init__(self, parent, title): 
         wx.Dialog.__init__(self, parent, title = title, \
@@ -240,6 +381,8 @@ class PlacementDialog(wx.Dialog):
         self.parent = parent
         self.bd = self.parent.bd
         self.make_widgets()
+        self.block_choice.SetSelection(0)
+        self.load_placement_params_from_block()
 
 
     

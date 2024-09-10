@@ -77,7 +77,9 @@ class SetInputsDialog(wx.Dialog):
         my_choice = self.other_names[0]
         #self.choice_selected(my_choice)
 
-        self.hide_input_2_stuff()
+        ## check for number of inputs
+        if self.block_instance.num_inputs == 1:
+            self.hide_input_2_stuff()
         panel.SetSizer(self.vbox)
         
 
@@ -94,13 +96,25 @@ class SetInputsDialog(wx.Dialog):
         self.EndModal(0)
 
 
+    def get_block_name_fromn_widget(self, widget):
+        ind = widget.GetSelection()
+        name = widget.GetString(ind)
+        return name
+
+
+    def get_block_instance_from_widget(self, widget):
+        myname = self.get_block_name_fromn_widget(widget)
+        myinstance = self.parent.bd.get_block_by_name(myname)
+        return myinstance
+
+
     def on_go_button(self, event):
-        ind1 = self.input_choices_1.GetSelection()
-        name1 = self.input_choices_1.GetString(ind1)
-        print("ind1, name1 = %s, %s" % (ind1, name1))
-        self.input1_name = name1
-        in1_instance = self.parent.bd.get_block_by_name(name1)
+        in1_instance = self.get_block_instance_from_widget(self.input_choices_1)
         self.block_instance.set_input_block1(in1_instance)
+        if self.block_instance.num_inputs > 1: 
+            in2_instance = self.get_block_instance_from_widget(self.input_choices_2)
+            self.block_instance.set_input_block2(in2_instance)
+
         ## need to handle input2 or higher here if needed
         self.EndModal(1)
 
