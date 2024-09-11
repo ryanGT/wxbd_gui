@@ -207,6 +207,9 @@ class Window(wx.Frame):
         editPlacementMenuItem = blockMenu.Append(wx.Window.NewControlId(), \
                                                 "Editted Block Placement",
                                        "Change where a block is placed on the block diagram")
+        deleteblockMenuItem = blockMenu.Append(wx.Window.NewControlId(), \
+                                                 "Delete Block",
+                                "Permanently delete a block from the block diagram model.")
 
 
         sysMenu = wx.Menu()
@@ -231,6 +234,7 @@ class Window(wx.Frame):
         self.Bind(wx.EVT_MENU, self.onEditPlacement, editPlacementMenuItem)
         self.Bind(wx.EVT_MENU, self.onReplaceBlock, ReplaceBlockMenuItem)
         self.Bind(wx.EVT_MENU, self.onSetInputs, setInputsMenuItem)
+        self.Bind(wx.EVT_MENU, self.on_delete_block, deleteblockMenuItem)
         self.Bind(wx.EVT_MENU, self.on_set_arduino_tempalate, \
                   set_arduino_template_MenuItem)
         self.Bind(wx.EVT_MENU, self.on_get_arduino_template_path, \
@@ -265,6 +269,41 @@ class Window(wx.Frame):
         self.Show(True)
 
 
+
+    def on_delete_block(self, *args, **kwargs):
+        print("in on_delete_block")
+        ind = self.block_listbox.GetSelection()
+        print("ind = %s" % ind)
+        if ind == -1:
+            # nothing is selected
+            wx.MessageBox('You must select a block before you can delete it.', \
+                    'Select a block first', wx.OK | wx.ICON_WARNING)
+            return None
+
+
+        ## get the block name
+        block_name = self.block_listbox.GetString(ind)
+        msg = "Are you sure that you want to delete the block %s" % block_name
+        out = wx.MessageBox(msg,'Confirm Delete', \
+                wx.OK | wx.CANCEL |wx.ICON_WARNING)
+        print("out = %s" % out)
+        if out == wx.OK:
+            print("you pressed ok, I will now delete the block")
+            block = self.bd.get_block_by_name(block_name)
+            self.bd.delete_block(block)
+            #ind = self.block_listbox.FindString(block_name)
+            self.block_listbox.Delete(ind)
+            self.on_draw_btn()
+        elif out == wx.CANCEL:
+            print("you canceled; the block lives")
+            # - self.bd should have a delete block method
+            #     - handle inputs, relative placements, menu params, print
+            #       blocks, and any other references to the block
+            # - any references to the block in the gui need to also be deleted
+            #     - get the block name out of my listbox
+        else:
+            print("you did something I did not expect")
+            
 
     def on_show_versions(self, *args, **kwargs):
         line1 = "wxbd_gui version: %s" % version
@@ -514,6 +553,9 @@ class Window(wx.Frame):
         """"""
         print("in onExit")
         self.save_params()
+        if hasattr(self, "csv_path"):
+            self.bd.save_model_to_csv(self.csv_path)
+
         self.Close()
 
 
