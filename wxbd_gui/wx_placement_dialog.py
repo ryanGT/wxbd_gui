@@ -74,10 +74,16 @@ not_top = left_or_right|wx.BOTTOM
 class RelativePanel(wx.Panel):
     def get_other_block_names(self):
         all_names = self.parent.bd.block_name_list
-        self.block_name = self.parent.get_selected_block_name()
-        other_names = [item for item in all_names if item != self.block_name]
-        self.other_names = other_names
+        try:
+            # getting the selected block name may fail if it
+            # has not yet been set by the parent
+            self.block_name = self.parent.get_selected_block_name()
+            other_names = [item for item in all_names if item != self.block_name]
+            self.other_names = other_names
+        except:
+            self.other_names = all_names
         return self.other_names
+        
 
 
 
@@ -273,6 +279,7 @@ class AbsPanel(RelativePanel):
 class PlacementDialog(wx.Dialog): 
     def get_selected_block_name(self):
         ind = self.block_choice.GetSelection()
+        print("ind = %s" % ind)
         block_name = self.block_choice.GetString(ind)
         return block_name
 
@@ -382,6 +389,10 @@ class PlacementDialog(wx.Dialog):
         self.bd = self.parent.bd
         self.make_widgets()
         self.block_choice.SetSelection(0)
+        test = self.block_choice.GetSelection()
+        print("test = %s" % test)
+        myname = self.get_selected_block_name()
+        print("myname = %s" % myname)
         self.load_placement_params_from_block()
 
 
