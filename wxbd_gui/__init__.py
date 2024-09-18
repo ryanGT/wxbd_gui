@@ -1,6 +1,6 @@
 import wx
 
-version = '1.0.2'
+version = '1.0.3'
 
 import numpy as np
 import os, shutil, re, sys
@@ -303,7 +303,7 @@ class Window(wx.Frame):
             #     - get the block name out of my listbox
         else:
             print("you did something I did not expect")
-            
+
 
     def on_show_versions(self, *args, **kwargs):
         line1 = "wxbd_gui version: %s" % version
