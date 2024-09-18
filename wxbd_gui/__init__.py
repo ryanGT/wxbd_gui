@@ -1,6 +1,6 @@
 import wx
 
-version = '1.0.3'
+version = '1.0.5'
 
 import numpy as np
 import os, shutil, re, sys
@@ -205,7 +205,7 @@ class Window(wx.Frame):
                                                 "Replace Block",
                                        "Replace a block in the block diagram system")
         editPlacementMenuItem = blockMenu.Append(wx.Window.NewControlId(), \
-                                                "Editted Block Placement",
+                                                "Edit Block Placement",
                                        "Change where a block is placed on the block diagram")
         deleteblockMenuItem = blockMenu.Append(wx.Window.NewControlId(), \
                                                  "Delete Block",
