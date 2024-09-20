@@ -344,63 +344,6 @@ class AddBlockDialog(wx.Dialog):
         return out
 
 
-#    def _create_new_block(self, block_type, block_name, mydict):
-#        block_class = getattr(pybd, block_type)
-#
-#        if block_type in pybd.plant_class_names:
-#            # we need to handle plant classes with no actuator and those with two sensors
-#            print("this is a plant")
-#
-#            # possible cases:
-#            # - actuator or no actuator
-#            # - one sensor or two
-#            #     - must have at least one sensor to be a plant
-#            if block_type not in pybd.plants_with_no_actuators_names:
-#                # it has an actuator
-#                print("plant has an actuator")
-#                out = self.onAddActuator(event)
-#                print("out = %s" % out)
-#                if out != 1:
-#                    # users cancelled actuator creation dialog
-#                    # - do nothing
-#                    return None
-#                # if out == 1, then self.actuator has been set with the 
-#                # actuator instance
-#
-#            if block_type in pybd.plants_with_two_sensors_names:
-#                ## handle this eventually
-#                pass
-#            #    # it has two sensors
-#            #    sensor1_name = self.sensors_var.get()
-#            #    print("sensor1_name: %s" % sensor1_name)
-#            #    sensor2_name = self.sensor2_var.get()
-#            #    print("sensor2_name: %s" % sensor2_name)
-#            #    sensor1 = self.bd.get_sensor_by_name(sensor1_name)                
-#            #    kwargs['sensor1'] = sensor1
-#            #    sensor2 = self.bd.get_sensor_by_name(sensor2_name)                
-#            #    kwargs['sensor2'] = sensor2                
-#            else:
-#                print("plant has an actuator")
-#                out = self.onAddSensor(event)
-#                print("out = %s" % out)
-#                if out != 1:
-#                    # users cancelled sensor creation dialog
-#                    # - do nothing
-#                    return None
-#                # if out == 1, then self.sensor has been set with the 
-#                # sensor instance
-#
-#            #    # it has only one sensor
-#            #    sensor_name = self.sensors_var.get()
-#            #    print("sensor_name: %s" % sensor_name)
-#            #    mysensor = self.bd.get_sensor_by_name(sensor_name)
-#            #    kwargs['sensor'] = mysensor
-#
-#
-#        new_block = pybd.create_block(block_class, block_type, \
-#                block_name, **kwargs)
-#        return new_block 
-
 
     def get_block_type_and_name(self):
         ind = self.block_type_list.GetSelection()
