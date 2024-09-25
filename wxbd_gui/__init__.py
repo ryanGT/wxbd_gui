@@ -134,6 +134,9 @@ class Window(wx.Frame):
 
         sizer = wx.FlexGridSizer(3, 2, 5, 5)
 
+        self.rpi_output_path = None
+        self.rpi_template_path = None
+
         self.plotpanel = PlotPanel(panel)
         self.plotpanel.init_plot_data()
 
@@ -194,6 +197,23 @@ class Window(wx.Frame):
 
         code_gen_menu.AppendSubMenu(arduino_code_gen, "Arduino Code Generation")
 
+
+        rpi_code_gen = wx.Menu()
+        set_rpi_template_MenuItem = rpi_code_gen.Append(wx.Window.NewControlId(), \
+                        "Set Raspberry Pi Template File", \
+                        "Open dialog to locate the Raspberry Pi template file")
+        get_rpi_template_MenuItem = rpi_code_gen.Append(wx.Window.NewControlId(), \
+                        "Get Raspberry Pi Template File", \
+                        "Show the path to the Raspberry Pi Template File")
+        set_rpi_output_MenuItem = rpi_code_gen.Append(wx.Window.NewControlId(), \
+                        "Set Raspberry Pi Output Path", \
+                        "Open dialog to select the Raspberry Pi output file path")
+        gen_rpi_code_MenuItem = rpi_code_gen.Append(wx.Window.NewControlId(), \
+                        "Generate Raspberry Pi Code", \
+                        "Open the template file and insert block diagram code in places")
+        code_gen_menu.AppendSubMenu(rpi_code_gen, "Raspberry Pi Code Generation")
+
+
         menuBar.Append(fileMenu, "&File")
 
 
@@ -252,6 +272,16 @@ class Window(wx.Frame):
                 set_arduino_output_MenuItem)
         self.Bind(wx.EVT_MENU, self.on_arduino_codegen_menu, \
                 gen_arduino_code_MenuItem)
+
+        self.Bind(wx.EVT_MENU, self.on_set_rpi_tempalate, \
+                  set_rpi_template_MenuItem )
+        self.Bind(wx.EVT_MENU, self.on_get_rpi_template_path, \
+                  get_rpi_template_MenuItem)
+        self.Bind(wx.EVT_MENU, self.on_set_rpi_output_path, \
+                   set_rpi_output_MenuItem)
+        self.Bind(wx.EVT_MENU, self.on_rpi_codegen_menu, \
+                   gen_rpi_code_MenuItem)
+ 
         self.Bind(wx.EVT_MENU, self.on_menu_params, menuParamsMenuItem)
         self.Bind(wx.EVT_MENU, self.on_redraw_wires, menuRedrawWires)
 
@@ -275,9 +305,41 @@ class Window(wx.Frame):
         `pybd_gui.arduino_template_path`."""
         self.load_params()
 
-
         self.Centre()
         self.Show(True)
+
+
+
+    def on_set_rpi_output_path(self, *args, **kwargs):
+        print("in on_set_rpi_output_path")
+        SaveDialog = wx.FileDialog(self, \
+                "Select the Raspberry Pi Output File Path (*.c)", "", "", \
+                                       "c files (*.c)|*.c", \
+                            wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+        if SaveDialog.ShowModal() == wx.ID_CANCEL:
+            return None
+        else:
+            self.rpi_output_path = SaveDialog.GetPath()
+
+        SaveDialog.Destroy()
+
+
+
+
+    def on_rpi_codegen_menu(self, *args, **kwargs):
+        """Generate the Raspberry Pi code by using the block diagram's
+        `generate_rpi_code` function."""
+        print("in rpi_codegen function")
+        if not self.rpi_template_path:
+            self.on_set_rpi_tempalate()
+        if not self.rpi_output_path:
+            self.on_set_rpi_output_path()
+        print("rpi_template_path: %s" % self.rpi_template_path)
+        print("rpi_output_path: %s" % self.rpi_output_path)
+        print("blocks: %s" % self.bd.block_name_list)
+        self.bd.generate_rpi_code(self.rpi_output_path, \
+                                  template_path=self.rpi_template_path)
+
 
 
 
@@ -530,7 +592,8 @@ class Window(wx.Frame):
 
     def on_set_arduino_tempalate(self, event):
         print("setting arduino template file")
-        openFileDialog = wx.FileDialog(self, "Select the Arduino Template File (ino)", "", "", \
+        openFileDialog = wx.FileDialog(self, \
+                "Select the Arduino Template File (*.ino)", "", "", \
                                        "ino files (*.ino)|*.ino", \
                                                wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
 
@@ -542,11 +605,35 @@ class Window(wx.Frame):
         openFileDialog.Destroy()
 
 
+    def on_set_rpi_tempalate(self, event):
+        print("setting rpi template file")
+        openFileDialog = wx.FileDialog(self, \
+                "Select the Raspberry Pi Template File (*.c)", "", "", \
+                                       "c files (*.c)|*.c", \
+                                               wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+
+        if openFileDialog.ShowModal() == wx.ID_CANCEL:
+            return None
+        else:
+            self.rpi_template_path = openFileDialog.GetPath()
+
+        openFileDialog.Destroy()
+
+
+
     def on_get_arduino_template_path(self, event):
         if hasattr(self, "arduino_template_path"):
             msg = "Arduino Template Path:\n%s" % self.arduino_template_path
         else:
             msg = "Arduino Template Path Not Set"
+        wx.MessageBox(msg, 'Info', wx.OK | wx.ICON_INFORMATION)
+
+
+    def on_get_rpi_template_path(self, event):
+        if hasattr(self, "rpi_template_path"):
+            msg = "Raspberry Pi Template Path:\n%s" % self.rpi_template_path
+        else:
+            msg = "Raspberry Pi Template Path Not Set"
         wx.MessageBox(msg, 'Info', wx.OK | wx.ICON_INFORMATION)
 
 
