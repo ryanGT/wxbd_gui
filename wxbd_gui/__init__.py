@@ -1,6 +1,6 @@
 import wx
 
-version = '1.0.7'
+version = '1.0.9'
 
 import numpy as np
 import os, shutil, re, sys
@@ -285,7 +285,7 @@ class Window(wx.Frame):
                         new_name):
         self.bd.change_block_name(block_instance,\
                                       new_name, old_name)
-        ind = self.block_listbox.FindString(old_name) 
+        ind = self.block_listbox.FindString(old_name)
         self.block_listbox.Delete(ind)
         self.block_listbox.Insert(new_name, ind)
 
@@ -294,7 +294,7 @@ class Window(wx.Frame):
     def on_edit_block(self, *args, **kwargs):
         print("in on_edit_block")
         # - check that a block is already selected, like when setting the inputs
-        # - the EditBlockDialog can then show the correct number of 
+        # - the EditBlockDialog can then show the correct number of
         #   parameters automatically and decide whether or not to show
         #   actuator and sensor options
         ind = self.block_listbox.GetSelection()

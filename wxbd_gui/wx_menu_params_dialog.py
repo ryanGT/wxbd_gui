@@ -275,7 +275,11 @@ class MenuParamsDialog(wx.Dialog):
 
     def set_block_param_list(self, params_list):
         self.block_params_listbox.Clear()
-        self.block_params_listbox.InsertItems(params_list,0)	
+        if params_list:
+            # don't try to set the items if the block type is 
+            # a summing juntion or something like that without
+            # any parameters
+            self.block_params_listbox.InsertItems(params_list,0)	
        
 
     def on_block_selected(self, *args, **kwargs):
