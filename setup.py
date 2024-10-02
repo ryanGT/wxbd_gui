@@ -5,7 +5,7 @@ import setuptools
 
 setuptools.setup(
     name='wxbd_gui',    # This is the name of your PyPI-package.
-    version='1.0.9',
+    version='1.1.0',
     url='https://github.com/ryanGT/wxbd_gui',
     author='Ryan Krauss',
     author_email='ryanwkrauss@gmail.com',

@@ -1,6 +1,6 @@
 import wx
 
-version = '1.0.9'
+version = '1.1.0'
 
 import numpy as np
 import os, shutil, re, sys
@@ -160,10 +160,13 @@ class Window(wx.Frame):
         menuBar = wx.MenuBar()
         fileMenu = wx.Menu()
         save_id = wx.Window.NewControlId()
+        saveas_id = wx.Window.NewControlId()
         load_id = wx.Window.NewControlId()
 
         SaveMenuItem = fileMenu.Append(save_id, "Save to CSV", \
                                        "Save block diagram model to a .csv file")
+        SaveAsMenuItem = fileMenu.Append(saveas_id, "Save As (csv)", \
+                                       "Save block diagram model to new .csv file")
         LoadMenuItem = fileMenu.Append(load_id, "Load from CSV", \
                                        "Load block diagram model from a .csv file")
         exitMenuItem = fileMenu.Append(wx.Window.NewControlId(), "Exit", \
@@ -257,6 +260,7 @@ class Window(wx.Frame):
 
         self.Bind(wx.EVT_MENU, self.onExit, exitMenuItem)
         self.Bind(wx.EVT_MENU, self.onSave, SaveMenuItem)
+        self.Bind(wx.EVT_MENU, self.onSaveAs, SaveAsMenuItem)
         self.Bind(wx.EVT_MENU, self.onLoad, LoadMenuItem)
         self.Bind(wx.EVT_MENU, self.onAddBlock, addBlockMenuItem)
         self.Bind(wx.EVT_MENU, self.on_edit_block, editBlockMenuItem)
@@ -281,7 +285,7 @@ class Window(wx.Frame):
                    set_rpi_output_MenuItem)
         self.Bind(wx.EVT_MENU, self.on_rpi_codegen_menu, \
                    gen_rpi_code_MenuItem)
- 
+
         self.Bind(wx.EVT_MENU, self.on_menu_params, menuParamsMenuItem)
         self.Bind(wx.EVT_MENU, self.on_redraw_wires, menuRedrawWires)
 
@@ -730,6 +734,10 @@ class Window(wx.Frame):
         else:
             self.on_save_as_menu()
 
+
+    def onSaveAs(self, event):
+        print("in SaveAsMenuItem")
+        self.on_save_as_menu()
 
 
     def update_block_list(self):
