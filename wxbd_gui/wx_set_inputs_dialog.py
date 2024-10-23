@@ -121,7 +121,7 @@ class SetInputsDialog(wx.Dialog):
 
 
     def set_widget_by_name(self, widget, curname):
-        ind = widget.GetString(curname)
+        ind = widget.FindString(curname)
         widget.SetSelection(ind)
 
 
