@@ -40,20 +40,39 @@ class SetInputsDialog(wx.Dialog):
                 style=wx.RESIZE_BORDER|wx.CAPTION|wx.CLOSE_BOX)#, size = (250,150)) 
         self.block_name = block_name
         self.block_instance = block_instance
+        self.N = self.block_instance.num_inputs
         panel = wx.Panel(self) 
         self.panel = panel
         self.parent = parent
         self.vbox = wx.BoxSizer(wx.VERTICAL) 
         self.get_other_block_names()
-        self.input_choices_1 = wx.Choice(panel, choices=self.other_names)
-        self.input_choices_2 = wx.Choice(panel, choices=self.other_names)
-        self.label1 = wx.StaticText(panel, label = "Input 1")
-        self.label2 = wx.StaticText(panel, label = "Input 2")
-        self.vbox.AddMany([ (self.label1, 0, wx.ALL, myborder), \
-                            (self.input_choices_1, 0, wx.ALL|wx.EXPAND, myborder), \
-                            (self.label2, 0, wx.ALL, myborder), \
-                            (self.input_choices_2, 0, wx.ALL|wx.EXPAND, myborder), \
-                          ])
+
+        self.input_vars = []
+        for i in range(self.N):
+            curchoice = wx.Choice(panel, choices=self.other_names)
+            label_text = self.block_instance.gui_input_labels[i]
+            curlabel = wx.StaticText(panel, label=label_text)
+            j = i+1
+            attr_name = "input_choices_%i" % j
+            self.input_vars.append(attr_name)
+            setattr(self, attr_name, curchoice)
+            self.vbox.AddMany([ (curlabel, 0, wx.ALL, myborder), \
+                                (curchoice, 0, wx.ALL|wx.EXPAND, myborder), \
+                                ])
+
+
+
+)
+
+        #self.input_choices_1 = wx.Choice(panel, choices=self.other_names)
+        #self.input_choices_2 = wx.Choice(panel, choices=self.other_names)
+        #self.label1 = wx.StaticText(panel, label = "Input 1")
+        #self.label2 = wx.StaticText(panel, label = "Input 2")
+        #self.vbox.AddMany([ (self.label1, 0, wx.ALL, myborder), \
+        #                    (self.input_choices_1, 0, wx.ALL|wx.EXPAND, myborder), \
+        #                    (self.label2, 0, wx.ALL, myborder), \
+        #                    (self.input_choices_2, 0, wx.ALL|wx.EXPAND, myborder), \
+        #                  ])
 
         self.main_sizer = self.vbox
         ## Buttons
@@ -78,17 +97,17 @@ class SetInputsDialog(wx.Dialog):
         #self.choice_selected(my_choice)
 
         ## check for number of inputs
-        if self.block_instance.num_inputs == 1:
-            self.hide_input_2_stuff()
+        #if self.block_instance.num_inputs == 1:
+        #    self.hide_input_2_stuff()
         panel.SetSizer(self.vbox)
         
 
 
-    def hide_input_2_stuff(self):
-        self.input_choices_2.Hide()
-        self.label2.Hide()
-        self.panel.Layout()
-        self.panel.Update()
+#    def hide_input_2_stuff(self):
+#        self.input_choices_2.Hide()
+#        self.label2.Hide()
+#        self.panel.Layout()
+#        self.panel.Update()
 
 
 
@@ -109,11 +128,31 @@ class SetInputsDialog(wx.Dialog):
 
 
     def on_go_button(self, event):
-        in1_instance = self.get_block_instance_from_widget(self.input_choices_1)
-        self.block_instance.set_input_block1(in1_instance)
-        if self.block_instance.num_inputs > 1: 
-            in2_instance = self.get_block_instance_from_widget(self.input_choices_2)
-            self.block_instance.set_input_block2(in2_instance)
+        # tk version retrieve set input function names from 
+        # the block
+        # for example, the functions to set the inputs for an if block are:
+        # set_input_func_names=['set_bool_input', \
+        #                       'set_input_block1', \
+        #                       'set_input_block2'], \
+        ## Old, hard coded version for wx 1.0:
+        ##in1_instance = self.get_block_instance_from_widget(self.input_choices_1)
+        ##self.block_instance.set_input_block1(in1_instance)
+        ##if self.block_instance.num_inputs > 1: 
+        ##    in2_instance = self.get_block_instance_from_widget(self.input_choices_2)
+        ##    self.block_instance.set_input_block2(in2_instance)
+
+        ## from tk version:
+        for i in range(self.N):
+            cur_var = self.input_vars[i]
+            input_name = cur_var.GetValue()
+            print("input_name: %s" % input_name)
+            if input_name in self.bd.block_dict:
+                input_block = self.bd.get_block_by_name(input_name)
+            elif input_name in self.bd.sensors_dict:
+                input_block = self.bd.get_sensor_by_name(input_name)
+            func_name = self.block_instance.set_input_func_names[i]
+            myfunc = getattr(self.block_instance, func_name)
+            myfunc(input_block)
 
         ## need to handle input2 or higher here if needed
         self.EndModal(1)

@@ -495,6 +495,7 @@ class AddBlockDialog(wx.Dialog):
         block_type = self.block_type_list.GetString(ind)
         params, default_params = self.get_params_for_block_type(block_type)
         suggested_name = self.parent.bd.suggest_block_name(block_type)
+        print("suggested_name: %s" % suggested_name)
         self.block_name_box.SetValue(suggested_name)
 
         print("params: ")
