@@ -94,11 +94,35 @@ class SetInputsDialog(wx.Dialog):
         my_choice = self.other_names[0]
         #self.choice_selected(my_choice)
 
+
+        # set the wx.Choice selections for inputs that 
+        # are already specified
+        self.check_existing_inputs()
+
         ## check for number of inputs
         #if self.block_instance.num_inputs == 1:
         #    self.hide_input_2_stuff()
         panel.SetSizer(self.vbox)
         
+
+
+    def check_existing_inputs(self):
+        # if the block instance already has some inputs set,
+        # reflect that in the wx.Choice instances
+        # - use GetString and SetSelection
+        for i in range(self.N):
+            func_name = self.block_instance.get_input_func_names[i]
+            myfunc = getattr(self.block_instance, func_name)
+            curname = myfunc()
+            if curname:
+                cur_var = self.input_vars[i]
+                widget = getattr(self, cur_var)
+                self.set_widget_by_name(widget, curname)
+
+
+    def set_widget_by_name(self, widget, curname):
+        ind = widget.GetString(curname)
+        widget.SetSelection(ind)
 
 
 #    def hide_input_2_stuff(self):
