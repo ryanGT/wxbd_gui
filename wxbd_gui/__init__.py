@@ -720,6 +720,10 @@ class Window(wx.Frame):
             return None
 
         filename = saveFileDialog.GetPath()
+        fno, ext = os.path.splitext(filename)
+        # RPi does not automatically append the ext
+        # - hardcoding it to .csv
+        filename = fno + '.csv'
         print (filename)
         if filename:
             self.bd.save_model_to_csv(filename)

@@ -149,7 +149,7 @@ class AddBlockDialog(wx.Dialog):
 
     def __init__(self, parent, title): 
         super(AddBlockDialog, self).__init__(parent, title = title, \
-                size=(700,550), \
+                size=(700,700), \
                 style=wx.RESIZE_BORDER|wx.CAPTION|wx.CLOSE_BOX)#, size = (250,150)) 
         self.parent = parent
         self.bd = self.parent.bd
