@@ -146,10 +146,10 @@ class SetInputsDialog(wx.Dialog):
             input_name = self.get_block_name_from_widget(widget)       
             print("input_name: %s" % input_name)
             if input_name.strip():# not just blank or spaces
-                if input_name in self.bd.block_dict:
-                    input_block = self.bd.get_block_by_name(input_name)
-                elif input_name in self.bd.sensors_dict:
-                    input_block = self.bd.get_sensor_by_name(input_name)
+                if input_name in self.parent.bd.block_dict:
+                    input_block = self.parent.bd.get_block_by_name(input_name)
+                elif input_name in self.parent.bd.sensors_dict:
+                    input_block = self.parent.bd.get_sensor_by_name(input_name)
                 func_name = self.block_instance.set_input_func_names[i]
                 myfunc = getattr(self.block_instance, func_name)
                 myfunc(input_block)
