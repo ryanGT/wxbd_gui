@@ -44,10 +44,21 @@ class PrintBlocksDialog(wx.Dialog):
 
         self.hsizer1 = wx.BoxSizer(wx.HORIZONTAL) 
 
+
+        ## handle incoming pbdrint blocks
+        self.print_blocks_list = []
+        if hasattr(self.bd, 'print_blocks'):
+            if len(self.bd.print_blocks) > 0:
+                for block in self.bd.print_blocks:
+                    name = self.bd.get_name_for_block(block)
+                    self.print_blocks_list.append(name)
+
+        all_names = self.parent.get_block_names()
+        self.remaining_list = [item for item in all_names if item not in \
+                               self.print_blocks_list]
+
         ##msizer 1
         self.msizer1 = wx.BoxSizer(wx.VERTICAL) 
-        all_names = self.parent.get_block_names()
-        self.remaining_list = all_names
         self.remaining_list_box = wx.ListBox(panel, \
                                         size = (150,150), \
                                         choices=self.remaining_list, \
@@ -72,7 +83,7 @@ class PrintBlocksDialog(wx.Dialog):
 
 
         self.msizer3 = wx.BoxSizer(wx.VERTICAL) 
-        self.print_blocks_list = []
+        
         self.print_blocks_list_box = wx.ListBox(panel, \
                                         size = (150,150), \
                                         choices=self.print_blocks_list, \
@@ -117,6 +128,12 @@ class PrintBlocksDialog(wx.Dialog):
         #self.Bind(wx.EVT_LISTBOX, self.on_block_type_choice, self.block_type_list) 
         self.go_button.Bind(wx.EVT_BUTTON, self.on_go_button)
         self.cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel_button)
+        self.add_button.Bind(wx.EVT_BUTTON, self.on_add_button)
+        self.remove_button.Bind(wx.EVT_BUTTON, self.on_remove_button)
+        self.up_button.Bind(wx.EVT_BUTTON, self.on_up_button)
+        self.down_button.Bind(wx.EVT_BUTTON, self.on_down_button)
+
+
         self.Bind(wx.EVT_CLOSE, self.on_cancel_button)
 
         panel.SetSizerAndFit(self.vbox)
@@ -130,6 +147,50 @@ class PrintBlocksDialog(wx.Dialog):
         
 
 
+    def on_add_button(self, *args, **kwargs):
+        print("on_add_button")
+        ind = self.remaining_list_box.GetSelection()
+        name = self.remaining_list_box.GetString(ind)
+        self.remaining_list_box.Delete(ind)
+        self.print_blocks_list_box.Append(name)
+        
+
+
+    def on_remove_button(self, *args, **kwargs):
+        print("on_remove_button")
+        ind = self.print_blocks_list_box.GetSelection()
+        name = self.print_blocks_list_box.GetString(ind)
+        self.print_blocks_list_box.Delete(ind)
+        self.remaining_list_box.Append(name)
+
+
+    
+
+    def on_up_button(self, *args, **kwargs):
+        print("on_up_button")
+        ind = self.print_blocks_list_box.GetSelection()
+        if ind > 0:
+            name = self.print_blocks_list_box.GetString(ind)
+            self.print_blocks_list_box.Delete(ind)
+            self.print_blocks_list_box.Insert(name, ind-1)
+            self.print_blocks_list_box.SetSelection(ind-1)
+
+
+    
+
+    def on_down_button(self, *args, **kwargs):
+        print("on_down_button")
+        ind = self.print_blocks_list_box.GetSelection()
+        N = self.print_blocks_list_box.GetCount()
+        print("ind: %s" % ind)
+        print("N: %s" % N)
+        if (ind >= 0) and (ind < (N-1)):
+            name = self.print_blocks_list_box.GetString(ind)
+            self.print_blocks_list_box.Delete(ind)
+            self.print_blocks_list_box.Insert(name, ind+1)
+            self.print_blocks_list_box.SetSelection(ind+1)
+
+
 
     def on_cancel_button(self, event):
         self.EndModal(0)
@@ -137,5 +198,9 @@ class PrintBlocksDialog(wx.Dialog):
 
     def on_go_button(self, event):
         print("go!")
+        pb_list = self.print_blocks_list_box.GetStrings()
+        print("pb_list:")
+        print(pb_list)
+        self.bd.set_print_blocks_from_names(pb_list)
         self.EndModal(1)
 
