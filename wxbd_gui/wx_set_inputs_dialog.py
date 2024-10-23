@@ -116,8 +116,13 @@ class SetInputsDialog(wx.Dialog):
     def get_block_name_from_widget(self, widget):
         ind = widget.GetSelection()
         print("ind: %s" % ind)
-        name = widget.GetString(ind)
-        return name
+        try:
+            name = widget.GetString(ind)
+            return name
+        except:
+            print("bad index")
+            print("ind: %s" % ind)
+            return None
 
 
     def get_block_instance_from_widget(self, widget):
