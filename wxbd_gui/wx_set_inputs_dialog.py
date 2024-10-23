@@ -142,16 +142,18 @@ class SetInputsDialog(wx.Dialog):
         ## from tk version:
         for i in range(self.N):
             cur_var = self.input_vars[i]
-            input_name = cur_var.GetValue()
+            widget = getattr(self, cur_var)
+            input_name = widget.GetValue()
             print("input_name: %s" % input_name)
-            if input_name in self.bd.block_dict:
-                input_block = self.bd.get_block_by_name(input_name)
-            elif input_name in self.bd.sensors_dict:
-                input_block = self.bd.get_sensor_by_name(input_name)
-            func_name = self.block_instance.set_input_func_names[i]
-            myfunc = getattr(self.block_instance, func_name)
-            myfunc(input_block)
-
+            if input_name.strip():# not just blank or spaces
+                if input_name in self.bd.block_dict:
+                    input_block = self.bd.get_block_by_name(input_name)
+                elif input_name in self.bd.sensors_dict:
+                    input_block = self.bd.get_sensor_by_name(input_name)
+                func_name = self.block_instance.set_input_func_names[i]
+                myfunc = getattr(self.block_instance, func_name)
+                myfunc(input_block)
+    
         ## need to handle input2 or higher here if needed
         self.EndModal(1)
 
