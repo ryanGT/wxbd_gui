@@ -122,7 +122,7 @@ class SetInputsDialog(wx.Dialog):
         except:
             print("bad index")
             print("ind: %s" % ind)
-            return None
+            return ""
 
 
     def get_block_instance_from_widget(self, widget):
