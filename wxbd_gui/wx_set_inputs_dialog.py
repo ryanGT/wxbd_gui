@@ -62,8 +62,6 @@ class SetInputsDialog(wx.Dialog):
 
 
 
-)
-
         #self.input_choices_1 = wx.Choice(panel, choices=self.other_names)
         #self.input_choices_2 = wx.Choice(panel, choices=self.other_names)
         #self.label1 = wx.StaticText(panel, label = "Input 1")
