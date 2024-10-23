@@ -113,14 +113,14 @@ class SetInputsDialog(wx.Dialog):
         self.EndModal(0)
 
 
-    def get_block_name_fromn_widget(self, widget):
+    def get_block_name_from_widget(self, widget):
         ind = widget.GetSelection()
         name = widget.GetString(ind)
         return name
 
 
     def get_block_instance_from_widget(self, widget):
-        myname = self.get_block_name_fromn_widget(widget)
+        myname = self.get_block_name_from_widget(widget)
         myinstance = self.parent.bd.get_block_by_name(myname)
         return myinstance
 
@@ -143,7 +143,7 @@ class SetInputsDialog(wx.Dialog):
         for i in range(self.N):
             cur_var = self.input_vars[i]
             widget = getattr(self, cur_var)
-            input_name = widget.GetValue()
+            input_name = self.get_block_name_from_widget(widget)       
             print("input_name: %s" % input_name)
             if input_name.strip():# not just blank or spaces
                 if input_name in self.bd.block_dict:
