@@ -49,6 +49,7 @@ from wxbd_gui.wx_set_inputs_dialog import SetInputsDialog
 from wxbd_gui.wx_menu_params_dialog import MenuParamsDialog
 from wxbd_gui.wx_placement_dialog import PlacementDialog
 from wxbd_gui.wx_edit_block_dialog import EditBlockDialog
+from wxbd_gui.wx_print_blocks_dialog import PrintBlocksDialog
 import py_block_diagram as pybd
 
 
@@ -244,6 +245,12 @@ class Window(wx.Frame):
         menuParamsMenuItem = sysMenu.Append(wx.Window.NewControlId(), \
                     "Set Menu Params", \
                     "Choose which parameters should be requested each time before running a test")
+        printBlocksMenuItem = sysMenu.Append(wx.Window.NewControlId(), \
+                    "Set Print Blocks", \
+           "Choose which blocks should print their output to the serial monitor")
+
+
+
 
         #addActuatorMenuItem = blockMenu.Append(wx.Window.NewControlId(), "Add Actuator",
         #                               "Add a new block to the block diagram system")
@@ -287,6 +294,9 @@ class Window(wx.Frame):
                    gen_rpi_code_MenuItem)
 
         self.Bind(wx.EVT_MENU, self.on_menu_params, menuParamsMenuItem)
+        self.Bind(wx.EVT_MENU, self.on_set_print_blocks, printBlocksMenuItem)
+    
+        
         self.Bind(wx.EVT_MENU, self.on_redraw_wires, menuRedrawWires)
 
         self.Bind(wx.EVT_MENU, self.on_show_versions, versionMenuItem)
@@ -505,6 +515,21 @@ class Window(wx.Frame):
 
         dlg.Destroy()
 
+
+
+    def on_set_print_blocks(self, *args, **kwargs):
+        dlg = PrintBlocksDialog(self)
+
+        out = dlg.ShowModal()
+        print("out = %s" % out)
+        if out == 1:
+            # If the add block dialog returned 1, it
+            # called append_block_to_dict.
+            # guess the block placement, then draw
+            print("Yay! print blocks.")
+            # need to place the new block
+
+        dlg.Destroy()
 
 
 
