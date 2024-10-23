@@ -383,7 +383,7 @@ class PlacementDialog(wx.Dialog):
 
     def __init__(self, parent, title): 
         wx.Dialog.__init__(self, parent, title = title, \
-                size=(300,550), \
+                size=(400,650), \
                 style=wx.RESIZE_BORDER|wx.CAPTION|wx.CLOSE_BOX)#, size = (250,150)) 
         self.parent = parent
         self.bd = self.parent.bd
