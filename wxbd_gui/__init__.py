@@ -1,6 +1,6 @@
 import wx
 
-version = '1.1.1'
+version = '1.1.2'
 
 import numpy as np
 import os, shutil, re, sys
@@ -295,8 +295,8 @@ class Window(wx.Frame):
 
         self.Bind(wx.EVT_MENU, self.on_menu_params, menuParamsMenuItem)
         self.Bind(wx.EVT_MENU, self.on_set_print_blocks, printBlocksMenuItem)
-    
-        
+
+
         self.Bind(wx.EVT_MENU, self.on_redraw_wires, menuRedrawWires)
 
         self.Bind(wx.EVT_MENU, self.on_show_versions, versionMenuItem)
