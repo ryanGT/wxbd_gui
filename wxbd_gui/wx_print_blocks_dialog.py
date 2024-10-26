@@ -2,6 +2,7 @@ import wx
 
 import py_block_diagram as pybd
 import copy
+from wxbd_gui.wxbd_utils import myDialog
 
 ## The Plan:
 ##
@@ -20,7 +21,7 @@ max_params = 4# the maximum number of parameres a block is assumed to have
 myborder = 5
 border_kwargs = {'flag':wx.ALL, 'border':myborder}
 
-class PrintBlocksDialog(wx.Dialog):
+class PrintBlocksDialog(myDialog):
     def get_other_block_names(self):
         all_names = self.parent.get_block_names()
         other_names = [item for item in all_names if item != self.block_name]
@@ -139,12 +140,7 @@ class PrintBlocksDialog(wx.Dialog):
         panel.SetSizerAndFit(self.vbox)
         #panel.SetSizer(self.vbox)
         #panel.Fit()
-        panel.Layout()
-        panel.Update()
-        self.Fit()
-        self.Layout()
-        self.Update()
-        
+        self.size_me() 
 
 
     def on_add_button(self, *args, **kwargs):
