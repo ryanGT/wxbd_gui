@@ -15,6 +15,7 @@ max_params = 6# the maximum number of parameres a block is assumed to have
 from wxbd_gui.wxbd_utils import params_mini_panel, myDialog
 from wxbd_gui.wx_add_actuator_or_sensor_dialog import AddActuatorDialog, \
                         AddSensorDialog
+from wxbd_gui import parse_array_str
 
 
 
@@ -314,12 +315,16 @@ class EditBlockDialog(myDialog):
  
 
     def on_go_button(self, event):
+        # this code tries to convert things to floats
+        # and then just gives up and uses the string:
+        # - can I check for things that contain arrays?
+        # - should I have a custom dialog for digcomps?
         mydict = self.read_params_from_boxes()
         print("mydict = %s" % mydict)
         # how do we handle any changes the user made?
         # - what if they changed the block name?
         # - can I immediately use setattr on mydict to update things?
-        #     - done
+        #     - done 
         for key, val in mydict.items():
             setattr(self.block_instance, key, val)
 
@@ -461,7 +466,10 @@ class EditBlockDialog(myDialog):
             curpanel = self.params_panels[i]
             curstr = curpanel.GetValue()
             try:
-                myvalue = float(curstr)
+                if '[' in curstr:
+                    myvalue = parse_array_str(curstr)
+                else:
+                    myvalue = float(curstr)
             except:
                 myvalue = curstr
             mydict[p] = myvalue
