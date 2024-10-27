@@ -2,6 +2,7 @@ import wx
 
 import py_block_diagram as pybd
 import copy
+from wxbd_gui.wxbd_utils import myDialog
 
 ## The Plan:
 ##
@@ -20,7 +21,7 @@ max_params = 4# the maximum number of parameres a block is assumed to have
 myborder = 5
 border_kwargs = {'flag':wx.ALL, 'border':myborder}
 
-class SetInputsDialog(wx.Dialog):
+class SetInputsDialog(myDialog):
     def _get_choice_list(self):
         return pybd.actuator_list
 
@@ -103,6 +104,8 @@ class SetInputsDialog(wx.Dialog):
         #if self.block_instance.num_inputs == 1:
         #    self.hide_input_2_stuff()
         panel.SetSizer(self.vbox)
+        self.size_me() 
+
         
 
 

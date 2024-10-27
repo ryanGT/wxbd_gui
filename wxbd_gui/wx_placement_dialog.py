@@ -2,6 +2,7 @@ import wx
 
 import py_block_diagram as pybd
 import copy
+from wxbd_gui.wxbd_utils import myDialog
 
 myborder = 5
 left_or_right = wx.LEFT|wx.RIGHT
@@ -276,7 +277,7 @@ class AbsPanel(RelativePanel):
         
 
 
-class PlacementDialog(wx.Dialog): 
+class PlacementDialog(myDialog): 
     def get_selected_block_name(self):
         ind = self.block_choice.GetSelection()
         print("ind = %s" % ind)
@@ -394,6 +395,7 @@ class PlacementDialog(wx.Dialog):
         myname = self.get_selected_block_name()
         print("myname = %s" % myname)
         self.load_placement_params_from_block()
+        self.size_me() 
 
 
     

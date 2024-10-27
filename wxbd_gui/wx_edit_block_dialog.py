@@ -12,13 +12,13 @@ import copy
 
 max_params = 6# the maximum number of parameres a block is assumed to have
 
-from wxbd_gui.wxbd_utils import params_mini_panel
+from wxbd_gui.wxbd_utils import params_mini_panel, myDialog
 from wxbd_gui.wx_add_actuator_or_sensor_dialog import AddActuatorDialog, \
                         AddSensorDialog
 
 
 
-class EditBlockDialog(wx.Dialog): 
+class EditBlockDialog(myDialog): 
     def _make_main_sizers_and_panel(self):
         self.panel = wx.Panel(self) 
         self.fgsizer = wx.FlexGridSizer(6, 1, 5, 5)
@@ -150,6 +150,8 @@ class EditBlockDialog(wx.Dialog):
         self.param_list = self.block_instance.param_list
         self._make_main_sizers_and_panel()
         self.make_widgets()
+        self.size_me() 
+
 
 
     def deselect_inputs(self):

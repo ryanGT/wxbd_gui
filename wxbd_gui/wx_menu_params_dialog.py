@@ -1,5 +1,8 @@
 import wx
 
+from wxbd_gui.wxbd_utils import myDialog
+
+
 import py_block_diagram as pybd
 import copy
 myborder = 5
@@ -15,7 +18,7 @@ def get_selected_string(widget):
     return item
 
 
-class MenuParamsDialog(wx.Dialog): 
+class MenuParamsDialog(myDialog): 
     def make_global_params_panel(self):
         self.gp_panel = wx.Panel(self.main_panel)
         self.gp_sizer = wx.GridSizer(2,vgap=0, hgap=10)
@@ -133,6 +136,14 @@ class MenuParamsDialog(wx.Dialog):
 
         
         self.main_panel.SetSizer(self.wrapper)
+        self.panel = self.main_panel
+        self.panel.Layout()
+        self.panel.Update()
+        self.Fit()
+        self.Layout()
+        self.Update()
+        
+
 
         
 
@@ -170,6 +181,8 @@ class MenuParamsDialog(wx.Dialog):
 
         if not bd_has_params:
             self.menu_params_list = []
+
+        self.size_me()
 
 
 

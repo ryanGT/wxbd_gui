@@ -51,4 +51,14 @@ class params_mini_panel(wx.Panel):
 
 
 
+class myDialog(wx.Dialog):
+    def size_me(self):
+        self.panel.Layout()
+        self.panel.Update()
+        self.Fit()
+        self.Layout()
+        self.Update()
+        
+            
+
 

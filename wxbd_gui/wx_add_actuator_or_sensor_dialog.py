@@ -17,12 +17,12 @@ import copy
 
 max_params = 4# the maximum number of parameres a block is assumed to have
 
-from wxbd_gui.wxbd_utils import params_mini_panel
+from wxbd_gui.wxbd_utils import params_mini_panel, myDialog
 
 myborder = 5
 border_kwargs = {'flag':wx.ALL, 'border':myborder}
 
-class AddActuatorDialog(wx.Dialog): 
+class AddActuatorDialog(myDialog):
     def create_params_panels(self):
         self.params_panels = []
 
@@ -96,6 +96,7 @@ class AddActuatorDialog(wx.Dialog):
         self.choice_selected(my_choice)
 
         panel.SetSizer(self.vbox)
+        self.size_me()
         
 
 
@@ -347,6 +348,7 @@ class AddSensorDialog(AddActuatorDialog):
         self.choice_selected(my_choice)
         self.go_button.SetLabel("Add Sensor")
         self.panel.SetSizer(self.vbox)
+        self.size_me()
         
 
     def get_params_dict(self):
