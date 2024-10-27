@@ -150,6 +150,7 @@ class EditBlockDialog(myDialog):
         self.param_list = self.block_instance.param_list
         self._make_main_sizers_and_panel()
         self.make_widgets()
+        self.wrapper.Fit(self)
         self.size_me() 
 
 
