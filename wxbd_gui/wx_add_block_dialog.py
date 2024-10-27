@@ -499,6 +499,8 @@ class AddBlockDialog(myDialog):
         #self.create_params_sizer_and_panel()
         ind = self.block_type_list.GetSelection()
         block_type = self.block_type_list.GetString(ind)
+        if block_type == 'digcomp':
+            print("I need to create a digcomp block.  How?")
         params, default_params = self.get_params_for_block_type(block_type)
         suggested_name = self.parent.bd.suggest_block_name(block_type)
         print("suggested_name: %s" % suggested_name)
@@ -565,7 +567,7 @@ class AddBlockDialog(myDialog):
 
     def get_params_for_block_type(self, block_type):
         myclass = pybd.block_classes_dict[block_type]
-        temp_block = myclass()
+        temp_block = myclass()#<-- this is my current error for digcomp
         py_params = temp_block.py_params
         default_params = {}
         if hasattr(temp_block, "default_params"):
