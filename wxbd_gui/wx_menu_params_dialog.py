@@ -137,11 +137,6 @@ class MenuParamsDialog(myDialog):
         
         self.main_panel.SetSizer(self.wrapper)
         self.panel = self.main_panel
-        self.panel.Layout()
-        self.panel.Update()
-        self.Fit()
-        self.Layout()
-        self.Update()
         
 
 
@@ -182,6 +177,7 @@ class MenuParamsDialog(myDialog):
         if not bd_has_params:
             self.menu_params_list = []
 
+        self.wrapper.Fit(self)
         self.size_me()
 
 

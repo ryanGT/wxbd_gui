@@ -104,6 +104,7 @@ class SetInputsDialog(myDialog):
         #if self.block_instance.num_inputs == 1:
         #    self.hide_input_2_stuff()
         panel.SetSizer(self.vbox)
+        self.main_sizer.Fit(self)
         self.size_me() 
 
         

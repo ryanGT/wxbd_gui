@@ -154,6 +154,7 @@ class AddBlockDialog(myDialog):
         self.parent = parent
         self.bd = self.parent.bd
         self._make_main_sizers_and_panel()
+        self.fgsizer.Fit(self)
         self.make_widgets()
         self.size_me() 
 

@@ -96,6 +96,7 @@ class AddActuatorDialog(myDialog):
         self.choice_selected(my_choice)
 
         panel.SetSizer(self.vbox)
+        self.main_sizer.Fit(self)
         self.size_me()
         
 
@@ -234,6 +235,9 @@ class AddActuatorDialog(myDialog):
         ind, my_choice = self.get_my_choice()
         print("my_choice: %s" % my_choice)
         self.choice_selected(my_choice)
+        self.params_sizer.Fit(self)
+        self.main_sizer.Fit(self)
+        self.size_me()
 
 
 
