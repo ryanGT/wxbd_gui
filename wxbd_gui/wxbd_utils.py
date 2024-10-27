@@ -9,7 +9,7 @@ class params_mini_panel(wx.Panel):
         # - create vertical sizer
         # - add tabel and textctrl to sizer with padding
         self.label = wx.StaticText(self, label=param_label)
-        self.text = wx.TextCtrl(self, size=(100,10))
+        self.text = wx.TextCtrl(self, size=(200,10))
         self.vbox.Add(self.label, wx.TOP|wx.LEFT|wx.RIGHT)
         self.vbox.Add(self.text, wx.BOTTOM|wx.LEFT|wx.RIGHT)#|wx.EXPAND)
         self.SetSizer(self.vbox)
