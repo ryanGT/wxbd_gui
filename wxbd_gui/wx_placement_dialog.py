@@ -395,8 +395,15 @@ class PlacementDialog(myDialog):
         myname = self.get_selected_block_name()
         print("myname = %s" % myname)
         self.load_placement_params_from_block()
+        self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.notebook_change)
+        self.wrapper.Fit(self)
         self.size_me() 
 
+
+    def notebook_change(self, *args, **kwargs):
+        print("notebook changed")
+        self.size_me()
+            
 
     
     def on_cancel_button(self, event):
