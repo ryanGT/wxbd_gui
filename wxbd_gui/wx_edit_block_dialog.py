@@ -15,7 +15,6 @@ max_params = 6# the maximum number of parameres a block is assumed to have
 from wxbd_gui.wxbd_utils import params_mini_panel, myDialog
 from wxbd_gui.wx_add_actuator_or_sensor_dialog import AddActuatorDialog, \
                         AddSensorDialog
-from wxbd_gui import parse_array_str
 
 
 
@@ -467,7 +466,7 @@ class EditBlockDialog(myDialog):
             curstr = curpanel.GetValue()
             try:
                 if '[' in curstr:
-                    myvalue = parse_array_str(curstr)
+                    myvalue = pybd.parse_array_str(curstr)
                 else:
                     myvalue = float(curstr)
             except:
