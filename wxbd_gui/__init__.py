@@ -1,6 +1,6 @@
 import wx
 
-version = '1.1.5'
+version = '1.1.6'
 
 import numpy as np
 import os, shutil, re, sys
