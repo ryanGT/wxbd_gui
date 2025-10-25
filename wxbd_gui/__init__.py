@@ -841,7 +841,9 @@ class Window(wx.Frame):
     def onAddBlock(self, event):
         """"""
         dlg = AddBlockDialog(self, "Add Block Dialog")
+        print("created dlg")
         out = dlg.ShowModal()
+        print("ShowModal done")
         print("out = %s" % out)
         if out == 1:
             # If the add block dialog returned 1, it

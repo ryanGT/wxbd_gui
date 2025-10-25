@@ -156,7 +156,9 @@ class AddBlockDialog(myDialog):
         self._make_main_sizers_and_panel()
         self.fgsizer.Fit(self)
         self.make_widgets()
+        self.panel.SetSizerAndFit(self.wrapper)
         self.size_me() 
+        print("finished __init__")
 
         
 
